@@ -624,8 +624,7 @@ body.stagebg-on .card.stage-ui::before{display:none}
 .pm-tip span{pointer-events:auto;text-decoration:underline;cursor:pointer;padding:5px 4px}
 .pm-slot.r .pm-port,.pm-port.r{animation-name:pmInR}
 .pm-port.dim{filter:drop-shadow(0 10px 26px rgba(0,0,0,.6)) brightness(.72)}
-.pm-port.tremble{animation:pmTremble .16s linear infinite}
-@keyframes pmTremble{0%,100%{transform:translate(0,0)}25%{transform:translate(-1.5px,1px)}50%{transform:translate(1.5px,-1px)}75%{transform:translate(-1px,-1.5px)}}
+/* 🫨 สั่นเบาๆ (shake:true) ทำผ่าน JS ใน pmTrembleStart แทน CSS animation เดิม เพราะ animation บน transform จะไปทับตำแหน่ง/ขนาด (dx/dy/sc) ที่ตั้งไว้จนภาพกระโดดไปจุด 0,0 */
 .pm-box{width:min(560px,100%);flex:none;margin-top:14px;position:relative;transform-origin:50% 100%;transition:width .15s ease}
 .pm-box[data-anchor="r"]::before{left:auto;right:26px}
 .pm-box[data-anchor="c"]::before{left:50%;margin-left:-8px}
@@ -966,6 +965,24 @@ body.title-mode{overflow:hidden}
 .s5cutfx.save{background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(58,107,214,.24) 40%,rgba(58,107,214,.16) 62%,rgba(0,0,0,.4))}
 .s2cut.s5cut.save{top:16%;height:60%}
 .s5cut.save img{transform:scale(2);filter:drop-shadow(0 10px 22px rgba(0,0,0,.7))}
+/* 🌍 เซฟรอบแรก — ดินระเบิด (ฝุ่นสีน้ำตาล/หิน + จอสั่น) */
+.s5cutfx.save1{background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(120,78,42,.32) 40%,rgba(120,78,42,.18) 62%,rgba(0,0,0,.4))}
+.s2cut.s5cut.save1{top:16%;height:60%}
+.s2cut.s5cut.save1::before{content:'';position:absolute;inset:-45%;pointer-events:none;
+ background:repeating-conic-gradient(rgba(168,116,58,.65) 0deg 4deg,transparent 4deg 20deg);
+ animation:s5burst .5s ease-out both}
+.s5cut.save1 img{transform:scale(2);filter:drop-shadow(0 10px 22px rgba(0,0,0,.7)) sepia(.4) saturate(1.5)}
+.pitch.eqk{animation:shk .45s}
+/* ⚡ เซฟรอบสอง — สายฟ้าร้าว (แฟลชขาว-ฟ้ากระพริบเร็ว + รอยแตกร้าว) */
+.s5cutfx.save2{background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(120,200,255,.32) 40%,rgba(120,200,255,.16) 62%,rgba(0,0,0,.4));animation:s5flash .35s ease-out both}
+.s2cut.s5cut.save2{top:16%;height:60%;overflow:visible}
+.s2cut.s5cut.save2::after{content:'';position:absolute;inset:-30% -10%;pointer-events:none;
+ background:linear-gradient(105deg,transparent 46%,rgba(255,255,255,.92) 48%,rgba(150,220,255,.9) 50%,transparent 52%),
+  linear-gradient(75deg,transparent 60%,rgba(255,255,255,.75) 62%,transparent 64%);
+ animation:s5bolt .45s ease-out both}
+.s5cut.save2 img{transform:scale(2);filter:drop-shadow(0 10px 22px rgba(0,0,0,.7)) drop-shadow(0 0 18px rgba(150,220,255,.9)) brightness(1.1)}
+@keyframes s5flash{0%{filter:brightness(2.6)}100%{filter:brightness(1)}}
+@keyframes s5bolt{0%{opacity:0}25%{opacity:1}40%{opacity:.15}55%{opacity:1}100%{opacity:0}}
 /* 💥 ทะลุไมก้าสำเร็จ — แสงระเบิดสีทอง/ขาว (ไม่ใช่ ERROR แดง) */
 .s5cutfx.brk{background:radial-gradient(circle at 50% 46%,rgba(255,255,255,.85) 0,rgba(255,214,64,.4) 32%,rgba(0,0,0,.5) 100%)}
 .s2cut.s5cut.brk{overflow:visible}
@@ -1032,16 +1049,28 @@ body.title-mode{overflow:hidden}
 /* 🎪 ตู้คีบตุ๊กตา (ด่าน 6) */
 .pm-ov.s6gpre{background-color:#0d151c;background-image:url('Troom.webp');background-size:cover;background-position:center}
 .pm-ov.s6gzoom{background-color:#0d151c;background-image:url('Keep.webp');background-size:cover;background-position:center}
-.s6g-box{max-width:340px;padding:14px;border-radius:20px 20px 20px 6px}
-.s6g-cab{position:relative;height:260px;border-radius:14px;overflow:hidden;background:radial-gradient(circle at 50% 20%,#2a1650,#0a0614 75%);border:1px solid rgba(255,255,255,.12)}
+.s6g-box{max-width:300px;padding:14px;border-radius:20px 20px 20px 6px}
+.s6g-mach{position:relative;width:100%;aspect-ratio:768/1237;border-radius:14px;overflow:hidden;
+ background-image:url('Keep.webp');background-size:cover;background-position:center;background-color:#0a0614}
+.s6g-cab{position:absolute;left:19.5%;top:22%;width:62%;height:51%;overflow:hidden;border-radius:4px}
 .s6g-icons{position:absolute;inset:0}
 .s6g-ic{position:absolute;font-size:20px;opacity:.85;animation:s6gFloat 2.6s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
 @keyframes s6gFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.s6g-cow{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);z-index:2;animation:s6gPulse 1.8s ease-in-out infinite}
+.s6g-cow{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);z-index:2;animation:s6gPulse 1.8s ease-in-out infinite;transition:top .45s cubic-bezier(.4,0,.2,1),opacity .35s ease}
 .s6g-cow img{width:76px;height:auto}
+.s6g-cow.s6g-grabbed{top:14%;opacity:1;animation:none}  /* 🪝 ตุ๊กตาติดตะขอลอยขึ้นพร้อมก้าม ค้างให้เห็นชัดๆก่อนตัดฉาก/รีเฟรช */
+.s6g-cow.s6g-respawn{transition:none;top:52%;opacity:0} /* รีเซ็ตตุ๊กตาตัวใหม่ให้โผล่กลางตู้อีกครั้งแบบไม่มีระยะเปลี่ยน ก่อนเฟดกลับเข้ามา */
 @keyframes s6gPulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,213,74,.4))}50%{filter:drop-shadow(0 0 20px rgba(255,213,74,.85))}}
 .s6g-claw{position:absolute;left:50%;top:6px;transform:translate(-50%,0);font-size:30px;z-index:3;transition:top .45s cubic-bezier(.4,0,.2,1)}
 .s6g-claw.drop{top:48%}
+/* 🐃 อนิเมชันส่งตุ๊กตาควายให้มายา (ฉากคุยหลังคีบ) */
+.s6g-fly{position:absolute;width:100px;height:auto;transform:translate(-50%,-50%) scale(.5);opacity:0;z-index:8;pointer-events:none;
+ filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));
+ transition:left .55s cubic-bezier(.4,0,.2,1),top .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1),opacity .3s ease}
+.s6g-fly.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.s6g-fly.fly{transform:translate(-50%,-50%) scale(.55);opacity:0}
+.pm-port.s6g-pop{animation:s6gPopFlash .5s ease}
+@keyframes s6gPopFlash{0%{filter:drop-shadow(0 10px 26px rgba(0,0,0,.6)) brightness(1.7)}100%{filter:drop-shadow(0 10px 26px rgba(0,0,0,.6)) brightness(1)}}
 .s6g-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
 .s6g-cost{font-weight:800;color:#ffd54a;font-size:13px}
 .s6g-stat{margin-top:8px;font-size:11px;color:#9fe8c8;text-align:center}
@@ -1373,6 +1402,8 @@ body.title-mode{overflow:hidden}
   </div>
 </div>
 <script>
+/* ⚠️ เนื้อเรื่อง post6-post11, pre7-pre11 แยกอยู่ที่ ./post/chX.js และ ./pre/chX.js
+   ห้ามแก้เนื้อเรื่องของบทเหล่านั้นในไฟล์นี้ */
 
 /* ================= CONFIG ================= */
 const CFG={SLOPE:1.7,TYPE:12,LUCK_B:.4,LUCK_P:4,FATIGUE:12,MIN:12,MAX:95,
@@ -2551,7 +2582,7 @@ const CARDS = [
 let S=null,R=null,LOG=[],DRAFT=[],TIMER=null,MEM=null,MIDNEXT=null,CUSTOMIZE_RENDER=null;
 const $=id=>document.getElementById(id);
 const rnd=n=>Math.random()*n;
-function newSave(){return{name:'',natIdx:0,lv:1,exp:0,st:{str:3,agi:3,dex:3,vit:40,luk:3},free:0,unlocked:1,created:false,mp:0,gearOwned:[],legendActive:null,custom:{hair:0,eyes:0,nose:0,mouth:0},stats:{runs:0,bestStage:0,bestStreak:0,stageFails:{},mastery:{}},story:{firstDef:false,midFear:false,twist:false,nlBoss:false,bossTalk:false,ending:false,skySpinUnlock:false,pwdIntro:false,pwdTaught:false,s3Done:false,zeroUnlocked:false,typeGuide:false,s4Done:false,driftUnlocked:false,s5Done:false,s6Done:false,s6GachaIntro:false,s6GachaCow:0},body:{w:70},diet:{str:0,agi:0,dex:0,vit:0},cafPending:false}}
+function newSave(){return{name:'',natIdx:0,lv:1,exp:0,st:{str:3,agi:3,dex:3,vit:40,luk:3},free:0,unlocked:1,created:false,mp:0,gearOwned:[],legendActive:null,custom:{hair:0,eyes:0,nose:0,mouth:0},stats:{runs:0,bestStage:0,bestStreak:0,stageFails:{},mastery:{}},story:{firstDef:false,midFear:false,twist:false,nlBoss:false,bossTalk:false,ending:false,skySpinUnlock:false,pwdIntro:false,pwdTaught:false,s3Done:false,zeroUnlocked:false,typeGuide:false,s4Done:false,driftUnlocked:false,s5Done:false,s6Done:false,s6GachaIntro:false,s6GachaCow:0,s6GachaUnlocked:false},body:{w:70},diet:{str:0,agi:0,dex:0,vit:0},cafPending:false}}
 const playerName=()=>(S&&S.name&&S.name.trim())?S.name.trim().slice(0,14):'กัมป์';
 function setName(v){S.name=(v||'').slice(0,14);save()}
 function load(){try{const d=localStorage.getItem(KEY);S=d?JSON.parse(d):newSave()}catch(e){S=MEM||newSave()}
@@ -2581,7 +2612,8 @@ function load(){try{const d=localStorage.getItem(KEY);S=d?JSON.parse(d):newSave(
  if(typeof S.story.driftUnlocked!=='boolean')S.story.driftUnlocked=(S.unlocked||1)>=5;   // Shadow Drift ปลดล็อกแล้ว
  if(typeof S.story.s5Done!=='boolean')S.story.s5Done=(S.unlocked||1)>=6;              // เซฟเก่าที่ผ่านด่าน 5 แล้ว ไม่ต้องดูเนื้อเรื่องด่าน 5 ซ้ำ
  if(typeof S.story.s6Done!=='boolean')S.story.s6Done=(S.unlocked||1)>=7;              // เซฟเก่าที่ผ่านด่าน 6 แล้ว ไม่ต้องดูเนื้อเรื่องด่าน 6 ซ้ำ
- if(typeof S.story.s6GachaIntro!=='boolean')S.story.s6GachaIntro=(S.unlocked||1)>=6;  // เซฟเก่าที่เคยเข้าด่าน 6 มาแล้ว = ปลดล็อกปุ่ม 🎪 ไปแล้ว
+ if(typeof S.story.s6GachaIntro!=='boolean')S.story.s6GachaIntro=(S.unlocked||1)>=6;  // เซฟเก่าที่เคยเข้าด่าน 6 มาแล้ว = เคยผ่านคัตซีนนี้แล้ว
+ if(typeof S.story.s6GachaUnlocked!=='boolean')S.story.s6GachaUnlocked=(S.unlocked||1)>=6;  // ปลดล็อกปุ่ม 🎪 ถาวร — แยกจาก s6GachaIntro เพื่อไม่ให้โดนรีเซ็ตตอน STORY_REPLAY_EACH_VISIT
  if(typeof S.story.s6GachaCow!=='number')S.story.s6GachaCow=0;
  if(typeof S.story.typeGuide!=='boolean')S.story.typeGuide=(S.unlocked||1)>=4;    // กล่องอธิบายท่าชนะทาง (ขึ้นครั้งเดียว)
 if('lvPending' in S) delete S.lvPending;
@@ -3327,6 +3359,9 @@ function showS5Pre(next){showS2Pre(next,S5_PRE,()=>s5Mark('pre'),{art:'Troom.web
 const S5_CUTIN_HTML='<div class="s2cutfx s5cutfx"></div><div class="s2cut s5cut"><img src="Boss5.webp" alt="" draggable="false" onerror="this.remove()"></div>';
 // 🧤 เซฟไว้ได้ (ยังไม่ทะลุ) — Boss5save.webp ขยาย 2 เท่า
 const S5_CUTIN_SAVE_HTML='<div class="s2cutfx s5cutfx save"></div><div class="s2cut s5cut save"><img src="Boss5save.webp" alt="" draggable="false" onerror="this.src=\'Boss5.webp\'"></div>';
+// 🌍 เซฟรอบแรก: ดินระเบิด · ⚡ เซฟรอบสอง: สายฟ้าร้าว (ตั้งแต่รอบ 3 กลับไปใช้เอฟเฟกต์เซฟปกติด้านบน)
+const S5_CUTIN_SAVE1_HTML='<div class="s2cutfx s5cutfx save1"></div><div class="s2cut s5cut save1"><img src="Boss5save.webp" alt="" draggable="false" onerror="this.src=\'Boss5.webp\'"></div>';
+const S5_CUTIN_SAVE2_HTML='<div class="s2cutfx s5cutfx save2"></div><div class="s2cut s5cut save2"><img src="Boss5save.webp" alt="" draggable="false" onerror="this.src=\'Boss5.webp\'"></div>';
 // 💥 ทะลุไมก้าสำเร็จ (แสงระเบิด ไม่ใช่ ERROR แดงแบบก่อน)
 const S5_CUTIN_BRK_HTML='<div class="s2cutfx s5cutfx brk"></div><div class="s2cut s5cut brk"><img src="Boss5.webp" alt="" draggable="false" onerror="this.remove()"></div>';
 
@@ -3334,7 +3369,7 @@ const S5_CUTIN_BRK_HTML='<div class="s2cutfx s5cutfx brk"></div><div class="s2cu
 function s5FightBubbles(){
  if(R.phase!=='gk'||!isStage5())return;
  if(s5Seen('gk'))return;
- s5Mark('gk');R.s5zc=0;
+ s5Mark('gk');R.s5zc=0;R.s5saveN=0;
  R.bubTalk=true;R.busy=true;scrBattle();
  bubbleSay([
   {who:'mika',text:'มุมเท้ายี่สิบองศา... แรงเหวี่ยงกล้ามเนื้ออยู่ในระดับ C+... วิถีบอลของนายถูกประมวลผลไว้หมดแล้วไอ้หนู'},
@@ -3345,7 +3380,9 @@ function s5FightBubbles(){
 function s5Save(){
  const r=R;
  R.busy=true;bubbleClear();
- R.cutin='save';R.scene='blk';R.blkLoss=false;R.flash=null;scrBattle();
+ R.s5saveN=(R.s5saveN||0)+1;                                     // 🌍⚡ รอบแรก=ดินระเบิด รอบสอง=สายฟ้าร้าว รอบ 3 ขึ้นไป=เอฟเฟกต์เซฟปกติ
+ R.cutin=R.s5saveN===1?'save1':R.s5saveN===2?'save2':'save';
+ R.scene='blk';R.blkLoss=false;R.flash=null;scrBattle();
  let dmg=Math.max(1,Math.round(dmgOf('TEC')));
  if(R.shield>0){R.shield--;log('🛡 โล่กำบังรับไว้! ดาเมจ 0 (เหลือ '+R.shield+')','ok')}
  else{R.hp=Math.max(1,R.hp-dmg);log('🧤 ไมก้าเซฟไว้ได้! −'+dmg+' HP (ยิงไม่เข้าก็ต้องเจ็บ) → เหลือ '+R.hp+' ('+(R.s5zc||0)+'/'+S5_ZC_NEED+')','bad')}
@@ -3394,6 +3431,32 @@ const isStage6=()=>!!(R&&R.stage===5&&!R.endless&&!R.over&&S&&S.story&&!S.story.
 const s6Seen=k=>s1Seen('s6_'+k);
 const s6Mark=k=>s1Mark('s6_'+k);
 
+// 🔌 helper hook สำหรับด่าน 7-11 (pattern เดียวกับ isStage6/s6Seen/s6Mark) — เนื้อเรื่องจริงอยู่ใน ./post/chX.js, ./pre/chX.js
+const isStage7=()=>!!(R&&R.stage===6&&!R.endless&&!R.over&&S&&S.story&&!S.story.s7Done);
+const s7Seen=k=>s1Seen('s7_'+k);
+const s7Mark=k=>s1Mark('s7_'+k);
+const s7PreNeeded=()=>!!(S&&S.story&&!S.story.s7Done&&!s7Seen('pre'));
+
+const isStage8=()=>!!(R&&R.stage===7&&!R.endless&&!R.over&&S&&S.story&&!S.story.s8Done);
+const s8Seen=k=>s1Seen('s8_'+k);
+const s8Mark=k=>s1Mark('s8_'+k);
+const s8PreNeeded=()=>!!(S&&S.story&&!S.story.s8Done&&!s8Seen('pre'));
+
+const isStage9=()=>!!(R&&R.stage===8&&!R.endless&&!R.over&&S&&S.story&&!S.story.s9Done);
+const s9Seen=k=>s1Seen('s9_'+k);
+const s9Mark=k=>s1Mark('s9_'+k);
+const s9PreNeeded=()=>!!(S&&S.story&&!S.story.s9Done&&!s9Seen('pre'));
+
+const isStage10=()=>!!(R&&R.stage===9&&!R.endless&&!R.over&&S&&S.story&&!S.story.s10Done);
+const s10Seen=k=>s1Seen('s10_'+k);
+const s10Mark=k=>s1Mark('s10_'+k);
+const s10PreNeeded=()=>!!(S&&S.story&&!S.story.s10Done&&!s10Seen('pre'));
+
+const isStage11=()=>!!(R&&R.stage===10&&!R.endless&&!R.over&&S&&S.story&&!S.story.s11Done);
+const s11Seen=k=>s1Seen('s11_'+k);
+const s11Mark=k=>s1Mark('s11_'+k);
+const s11PreNeeded=()=>!!(S&&S.story&&!S.story.s11Done&&!s11Seen('pre'));
+
 // ⚔ กลไก Pressing Wall — ภาพกองหลังกำหนดท่าที่ถูกตายตัว (ดู calc() ที่ใช้ S6_WALL_ACT)
 const PW_BONUS=30;
 const S6_WALL_ACT={61:'PWD',62:'DRB',63:'TEC'};
@@ -3411,54 +3474,6 @@ function s6FightBubbles(){
  if(R.s6Hint[R.idx])return;
  R.s6Hint[R.idx]=true;
  bubbleAdd({who:'jo',label:'โจ (ตะโกนจากนอกจอ)',text:h})}
-
-// 🎬 หลังจบเกม — โจซ้าย(r) / กัมป์กลาง(c) หอบ · มายายืนเงียบๆ ด้านหลัง
-const S6_POST=[
- {who:null,c:['Gump4.webp'],sp:'c',tag:'หอบแฮ่กๆ',text:'...'},
- {who:'กัมป์',sp:'c',text:'...ขอบใจที่ช่วยดึงตัวประกบ'},
- {who:'โจ',r:['Jo.webp'],sp:'r',text:'เหอะ... ก็แกมันมีปัญญาแค่เลี้ยงตะลุยนี่หว่า ฉันแค่ขี้เกียจเห็นแกตายคาสนามหรอกนะ'},
- {who:'โจ',sp:'r',text:'...คราวหน้า บอกฉันก่อนว่าจะใช้ท่าไหน ฉันจะได้หาช่องให้'},
- {who:'กัมป์',sp:'c',text:'...อือ'},
- {who:'โจ',sp:'r',text:'แล้วก็... อย่าฝืนขาแบบเมื่อกี้ล่ะ'}];
-
-// 📱 มายา: KAI SECURE CHANNEL — รายงานลับหลังจบด่าน 6 · บรรทัด RECOMMEND ถูกลบทีละตัวก่อนกดส่ง
-const S6_KAI_LINES=['SUBJECT: GUMP','SYNC: INCOMPLETE','CORE RESPONSE: RISING (+80%)'];
-const S6_KAI_REDACT='RECOMMEND: นำตัวกลับ';
-function showS6Kai(next){
- const old=document.querySelector('.s6kai-modal');if(old)old.remove();
- window.__s6kaiNext=next;
- $('app').insertAdjacentHTML('beforeend',`<div class="modal s6kai-modal"><div class="mbox" style="max-width:320px;padding:0;overflow:hidden;border-radius:22px 22px 22px 6px">
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#04140c;color:#4dffa0;font-family:monospace;font-size:11px;letter-spacing:.06em;border-bottom:1px solid #1d5c3a">
-   <span>⚡ KAI SECURE</span><span>📶 🔋 87%</span></div>
-  <div id="s6kaiBody" style="padding:14px;background:#0d1b14;min-height:150px;display:flex;flex-direction:column;gap:8px">
-   <div style="align-self:flex-start;max-width:88%;background:#173625;color:#9ef7c4;border-radius:4px 16px 16px 16px;padding:9px 12px;font-family:monospace;font-size:12.5px;line-height:1.6">${S6_KAI_LINES.map(l=>`<div>${l}</div>`).join('')}</div>
-   <div style="align-self:flex-start;max-width:88%;background:#173625;color:#9ef7c4;border-radius:4px 16px 16px 16px;padding:9px 12px;font-family:monospace;font-size:12.5px" id="s6kaiBub2"><span id="s6kaiRedact">${S6_KAI_REDACT}</span></div>
-  </div>
-  <div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:flex-end"><button class="btn-y" id="s6kaiBtn" style="display:none" onclick="s6kaiSend()">📤 SEND</button></div>
- </div></div>`);
- TIMER=setTimeout(()=>{
-  let t=S6_KAI_REDACT.length,n=0;
-  const step=()=>{
-   const el=document.getElementById('s6kaiRedact');
-   if(!el||t<=0){if(el){el.remove();const b=document.getElementById('s6kaiBtn');if(b)b.style.display=''}return}
-   n++;
-   el.innerHTML=S6_KAI_REDACT.slice(0,t-1)+'<span style="color:#ff4d4d;background:rgba(255,77,77,.35)">'+S6_KAI_REDACT[t-1]+'</span>';
-   if(n%3===0)navigator.vibrate?.(30);
-   TIMER=setTimeout(()=>{
-    const e2=document.getElementById('s6kaiRedact');
-    if(e2)e2.textContent=S6_KAI_REDACT.slice(0,t-1);
-    t--;
-    TIMER=setTimeout(step,40)
-   },60)};
-  step()
- },1500)}
-function s6kaiSend(){
- const body=document.getElementById('s6kaiBody');
- if(body)body.insertAdjacentHTML('beforeend','<div style="align-self:flex-end;max-width:70%;background:#ffd54a;color:#1a1200;border-radius:16px 4px 16px 16px;padding:8px 12px;font-family:monospace;font-size:12px;font-weight:700">REPORT SENT.</div>');
- const b=document.getElementById('s6kaiBtn');if(b)b.remove();
- TIMER=setTimeout(()=>{
-  const m=document.querySelector('.s6kai-modal');if(m)m.remove();
-  const n=window.__s6kaiNext;window.__s6kaiNext=null;if(n)n()},900)}
 
 // 🧪 ทดสอบซ้ำ: resetS6Story() (เฉพาะด่าน 6)
 window.resetS6Story=function(){
@@ -3478,9 +3493,9 @@ const S6_GACHA_POOL=['🎁','📦','🧻','⭐','🍬','🎈','🐣','🎀','�
 const S6G_PRE1=[
  {who:'มายา',l:['Maya11.webp'],sp:'l',text:'กัมป์... ฉันมีของที่อยากได้'},
  {who:'มายา',sp:'l',text:'มีของที่นายต้องใช้ด้วย ตามมาซิ'},
- {who:'กัมป์',c:['Gump5.webp','He.webp'],sp:'c',text:'...อื่ม'}];
+ {who:'กัมป์',c:[],sp:'c',text:'...อื่ม'}];
 const S6G_PRE2=[
- {who:'กัมป์',c:['He.webp'],sp:'c',text:'อะไร... ตุ๊กตาประหลาด'},
+ {who:'กัมป์',c:['Gump5.webp'],sp:'c',text:'อะไร... ตุ๊กตาประหลาด'},
  {who:'มายา',l:['Maya11.webp'],sp:'l',text:'...'},
  {who:'มายา',sp:'l',text:'เด็กคนอื่นมี'},
  {who:'มายา',sp:'l',text:'ฉันมีข้อมูล'},
@@ -3489,7 +3504,7 @@ const S6G_PRE2=[
  {who:'กัมป์',sp:'c',text:'...อือ'}];
 const S6G_PRE3=[
  {who:'มายา',l:['Maya12.webp','Maya11.webp'],sp:'l',text:'...'},
- {who:'กัมป์',c:['Gump5.webp','He.webp'],sp:'c',text:'ของเธอ'},
+ {who:'กัมป์',c:['Gump5.webp','He.webp'],sp:'c',text:'ของเธอ',giveCow:true},
  {who:'มายา',sp:'l',text:'...'},
  {who:'มายา',sp:'l',text:'...ขอบใจ'},
  {who:'มายา',sp:'l',text:'...รีบกลับกัน สายแล้ว'},
@@ -3507,16 +3522,20 @@ function s6gRoll(){
  const lp=LEGEND_ITEMS.filter(i=>!itemOwned(i.id));
  return lp.length?{t:'legend',it:lp[Math.floor(rnd(lp.length))]}:{t:'dup'}}
 
+// 🐃 รอบแรกที่คีบได้ควายจะเป็น Buff1.webp (ตัวพิเศษมีมงกุฎ ให้มายา) รอบต่อๆไปเป็น Buff.webp (ตัวธรรมดา)
+function s6gCowImg(){return (S.story.s6GachaCow>0)?'Buff.webp':'Buff1.webp'}
 // mode:'intro' = รอบแรกบังคับฟรี+ได้ควาย 100% (เรียกจาก startStage) · 'free' = คีบซ้ำจากปุ่ม 🎪 หน้าแผนที่ (1,000 บาท/ครั้ง)
 function openS6Gacha(mode,doneNext){
  const old=document.querySelector('.s6g-modal');if(old)old.remove();
  window.__s6g={mode:mode||'free',busy:false,doneNext:doneNext||null};
  const s=eff();
  $('app').insertAdjacentHTML('beforeend',`<div class="modal s6g-modal"><div class="mbox s6g-box">
-  <div class="s6g-cab">
-   <div class="s6g-icons">${s6gIcons().map((ic,i)=>`<span class="s6g-ic" style="left:${6+((i*37)%88)}%;top:${8+((i*53)%78)}%;animation-delay:${(i%9)*.15}s">${ic}</span>`).join('')}</div>
-   <div class="s6g-cow"><img src="Buff.webp" alt="" draggable="false" onerror="this.remove();this.parentNode.textContent='🐃'"></div>
-   <div class="s6g-claw" id="s6gClaw">🪝</div>
+  <div class="s6g-mach">
+   <div class="s6g-cab">
+    <div class="s6g-icons">${s6gIcons().map((ic,i)=>`<span class="s6g-ic" style="left:${6+((i*37)%88)}%;top:${8+((i*53)%78)}%;animation-delay:${(i%9)*.15}s">${ic}</span>`).join('')}</div>
+    <div class="s6g-cow"><img src="${s6gCowImg()}" alt="" draggable="false" onerror="this.remove();this.parentNode.textContent='🐃'"></div>
+    <div class="s6g-claw" id="s6gClaw">🪝</div>
+   </div>
   </div>
   <div class="s6g-bar">
    <span class="s6g-cost">${mode==='intro'?'🎁 ฟรี (ครั้งแรก)':'💰 '+baht(S6_GACHA_COST)}</span>
@@ -3532,27 +3551,47 @@ function s6gPull(){
   if((S.mp||0)<S6_GACHA_COST){s6gExit();return}   // เงินไม่พอ → ตัดกลับทันที ไม่ต้องแจ้งเตือน
   S.mp-=S6_GACHA_COST;save()}
  g.busy=true;
+ const res=g.mode==='intro'?{t:'cow'}:s6gRoll();               // 🎲 ทอยผลก่อนเริ่มอนิเมชัน จะได้รู้ว่าต้องให้ตุ๊กตาติดตะขอไปด้วยไหม
  const btn=document.getElementById('s6gPullBtn');if(btn)btn.disabled=true;
- const claw=document.getElementById('s6gClaw');if(claw)claw.classList.add('drop');
+ const claw=document.getElementById('s6gClaw');
+ const cow=document.querySelector('.s6g-cab .s6g-cow');
+ if(claw)claw.classList.add('drop');
  TIMER=setTimeout(()=>{
-  s6gResolve(g.mode==='intro'?{t:'cow'}:s6gRoll());
   if(claw)claw.classList.remove('drop');
-  g.busy=false;
-  const b2=document.getElementById('s6gPullBtn');if(b2)b2.disabled=(g.mode!=='intro'&&(S.mp||0)<S6_GACHA_COST)
+  if(res.t==='cow'&&cow){
+   cow.classList.add('s6g-grabbed');       // 🪝 คีบได้ควาย → ติดตะขอลอยขึ้น ค้างให้เห็นชัดๆก่อน
+   TIMER=setTimeout(()=>{                  // ⏳ ค้างตุ๊กตาไว้ ~1 วิ ก่อนค่อยตัดฉาก/รีเฟรชผล
+    s6gResolve(res);
+    g.busy=false;
+    const b2=document.getElementById('s6gPullBtn');if(b2)b2.disabled=(g.mode!=='intro'&&(S.mp||0)<S6_GACHA_COST);
+    if(cow.isConnected&&g.mode!=='intro'){   // โมดัลรอบแรกจะถูกปิดไปแล้ว → ไม่ต้องรีเซ็ตตุ๊กตา
+     cow.classList.add('s6g-respawn');
+     void cow.offsetWidth;
+     const img=cow.querySelector('img');if(img)img.src=s6gCowImg();
+     requestAnimationFrame(()=>cow.classList.remove('s6g-grabbed','s6g-respawn'))
+    }
+   },1000)
+  } else {
+   s6gResolve(res);
+   g.busy=false;
+   const b2=document.getElementById('s6gPullBtn');if(b2)b2.disabled=(g.mode!=='intro'&&(S.mp||0)<S6_GACHA_COST)
+  }
  },450)}
 
 function s6gResolve(res){
  const g=window.__s6g;if(!g)return;
  if(res.t==='cow'){
+  const isFirstCow=!(S.story.s6GachaCow>0);                    // ควายตัวแรกสุดในเกม → ได้ Buff1.webp (พิเศษ) ให้มายา
   S.st.luk=(S.st.luk||0)+1;S.story.s6GachaCow=(S.story.s6GachaCow||0)+1;
   showToast('🐃 ตุ๊กตาควาย! Luk +1 (ถาวร)','gold');save();
   if(g.mode==='intro'){
-   S.story.s6GachaIntro=true;save();
+   S.story.s6GachaIntro=true;S.story.s6GachaUnlocked=true;save();
+   window.__s6gGiftImg=isFirstCow?'Buff1.webp':'Buff.webp';
    const done=g.doneNext;
-   TIMER=setTimeout(()=>{
+   TIMER=setTimeout(()=>{                  // ตุ๊กตาค้างให้เห็นแล้วก่อนหน้านี้ ~1 วิ ส่วนนี้แค่หน่วงสั้นๆให้ toast ทันขึ้นก่อนตัดฉาก
     const m=document.querySelector('.s6g-modal');if(m)m.remove();window.__s6g=null;
     showPostMatch(S6G_PRE3,()=>{if(done)done()},'s6gpre')
-   },700);
+   },250);
    return}
   s6gRefresh();return}
  if(res.t==='none')return;   // 🧻 ทิชชู่ — ไม่แจ้งเตือน คีบต่อได้ทันที
@@ -3576,6 +3615,39 @@ function s6gExit(){
  const m=document.querySelector('.s6g-modal');if(m)m.remove();
  window.__s6g=null;
  if(R){R.busy=false;scrBattle()} else scrMapRender()}
+
+// 🐃➡️💗 อนิเมชันกัมป์ส่งตุ๊กตาควายให้มายา (เรียกจาก pmRender ตอนเจอบท who.giveCow===true)
+// โชว์ตุ๊กตากลางจอ 1 วิ แล้วไหลไปหาตำแหน่งจริงของมายา (ช่อง l) จากนั้นสลับภาพมายาเป็น Mayabuff.webp
+function s6gPlayGiveAnim(){
+ const ov=document.querySelector('.pm-ov');if(!ov)return;
+ const stage=ov.querySelector('.pm-stage');if(!stage)return;
+ const src=window.__s6gGiftImg||'Buff1.webp';
+ const stageR=stage.getBoundingClientRect();
+ const el=document.createElement('img');
+ el.src=src;el.alt='';el.draggable=false;el.className='s6g-fly';
+ el.onerror=()=>el.remove();
+ el.style.left=(stageR.width*0.5)+'px';
+ el.style.top=(stageR.height*0.42)+'px';
+ stage.appendChild(el);
+ requestAnimationFrame(()=>el.classList.add('show'));
+ TIMER=setTimeout(()=>{
+  if(!el.isConnected)return;
+  const lImg=ov.querySelector('.pm-slot.l .pm-port');
+  let tx=stageR.width*0.22,ty=stageR.height*0.55;
+  if(lImg){const r=lImg.getBoundingClientRect();tx=r.left-stageR.left+r.width*0.5;ty=r.top-stageR.top+r.height*0.32}
+  el.style.left=tx+'px';el.style.top=ty+'px';
+  el.classList.add('fly');
+  TIMER=setTimeout(()=>{el.remove();s6gSwapSlotImg('l','Mayabuff.webp')},600)
+ },1000)}
+// สลับภาพที่โชว์อยู่ในช่อง l/c/r ของฉากคุยหลังเกมทันที โดยไม่รีสตาร์ทอนิเมชันเข้าฉาก (ใช้กับมายาหลังรับตุ๊กตา)
+function s6gSwapSlotImg(slotName,src){
+ const ov=document.querySelector('.pm-ov');if(!ov)return;
+ const slot=ov.querySelector('.pm-slot.'+slotName);if(!slot)return;
+ const img=slot.querySelector('.pm-port');if(!img)return;
+ window.__pmPorts=window.__pmPorts||{};window.__pmPorts[slotName]=[src];
+ slot.dataset.k=src;img.dataset.alt='';img.src=src;
+ img.classList.remove('s6g-pop');void img.offsetWidth;img.classList.add('s6g-pop');
+ pmApplyPos()}
 
 
 /* ================= 💬 กล่องคุยหลังเกม (ด่าน 1 + ด่าน 2 + ด่าน 3 + ด่าน 4 · หลังยิงผ่านโกล) ================= */
@@ -3604,26 +3676,52 @@ const PM_EDIT=true;                                              // true = ล�
 const PM_POS_KEY='striker_pm_pos_v2'; // v2: บั๊กเก่าลากไม่เห็นผลแต่ยังเซฟพิกัดเพี้ยนๆ ไว้ใต้คีย์เดิม เปลี่ยนคีย์ให้ทุกฉากเริ่มจากตำแหน่งปกติใหม่
 let PM_DRAG=null;
 function pmStored(){let o={};try{o=JSON.parse(localStorage.getItem(PM_POS_KEY)||'{}')||{}}catch(e){}return o}
-function pmKey(slot){return (window.__pmScene||'pm')+'_'+slot}
+function pmKey(slot,imgId){return (window.__pmScene||'pm')+'_'+slot+(imgId?('__'+imgId):'')}
+// 🖼️ ระบุตัวละครจากไฟล์ภาพที่กำลังโชว์อยู่ในช่องนั้น (ช่องเดียวกันแต่คนละภาพ = แยกพิกัด/ขนาดกันเป็นอิสระ เช่น s5pm ช่อง r ใช้ทั้ง Eyecod3.webp และ Jo.webp)
+function pmImgId(img){return img?(''+img).split('/').pop().replace(/\.[^.]+$/,'').toLowerCase():''}
+function pmCurImg(slot){const p=(window.__pmPorts||{})[slot];return p&&p[0]}
 const PM_LOCKED_POS={                                             // ค่าที่ล็อกไว้ต่อฉาก (คัดลอกจากตอนแก้ตำแหน่งจริง)
  s1pm_l:{dx:-5.125335693359375,dy:-19.359649658203125,sc:1.4},
  s1pm_c:{dx:7.879508972167969,dy:-11.246841430664062,sc:1.08},
  s1pm_r:{dx:34.862518310546875,dy:-42.0794677734375,sc:0.84},
  s2pm_l:{dx:90.84375,dy:148.39028930664062,sc:1.72},
  s2pm_c:{dx:0,dy:0,sc:1},
- s2pm_r:{dx:-81.54689025878906,dy:6.862579345703125,sc:1.08}};
-function pmPos(slot){const o=pmStored(),k=pmKey(slot),v=o[k];return v||PM_LOCKED_POS[k]||{dx:0,dy:0,sc:1}}
+ s2pm_r:{dx:-81.54689025878906,dy:6.862579345703125,sc:1.08},
+ s5pm_l__mayasad:{dx:199.1111068725586,dy:-26.96875,sc:1},
+ s5pm_c:{dx:94.40690612792969,dy:-16.818084716796875,sc:0.84},
+ s5pm_r:{dx:-121.88780212402344,dy:-33.54718780517578,sc:1.8},                     // ⚠️ s5pm_r เป็นค่ากลาง ใช้ร่วมกันไปก่อนจนกว่าจะลากปรับตาวิค/โจแยกทีละคนแล้วกด "คัดลอกพิกัด" ใหม่ (ตอนนี้ปุ่มคัดลอกจะดึงค่าทุกตัวละครที่เคยลากในฉากนี้ ไม่ใช่แค่ตัวที่โชว์อยู่ตอนกด)
+ s6gzoom_c:{dx:89.564208984375,dy:-47.768768310546875,sc:1},
+ s6gzoom_c__gump5:{dx:77.936767578125,dy:-2.149658203125,sc:1},
+ s6gzoom_l__maya12:{dx:-10.204154968261719,dy:14.204864501953125,sc:1.4},
+ s6gzoom_l__maya11:{dx:-26.701736450195312,dy:12.693084716796875,sc:1.16},
+ s6gzoom_r:{dx:0,dy:0,sc:1},
+ s6gzoom_box:{dx:0,dy:0,sc:1},
+ s6gpre_l:{dx:83.22293472290039,dy:212.26226806640625,sc:1.56},
+ s6gpre_c:{dx:100.30209350585938,dy:23.393402099609375,sc:1},
+ s6gpre_box:{dx:-3.8937606811523438,dy:-16.7109375,sc:1},
+ s6gpre_l__maya11:{dx:82.4406623840332,dy:223.78207397460938,sc:1.56},
+ s6gpre_c__gump5:{dx:75.78787231445312,dy:66.62847900390625,sc:1},
+ s6gpre_l__maya12:{dx:-1.3319587707519531,dy:164.12266540527344,sc:1.72},
+ s6gpre_r:{dx:0,dy:0,sc:1}};
+function pmPos(slot){
+ const o=pmStored(),id=pmImgId(pmCurImg(slot)),k=pmKey(slot,id),kBase=pmKey(slot);
+ return o[k]||PM_LOCKED_POS[k]||o[kBase]||PM_LOCKED_POS[kBase]||{dx:0,dy:0,sc:1}}
 function pmSetPos(slot,patch){
- const o=pmStored(),k=pmKey(slot);o[k]=Object.assign(pmPos(slot),patch);
+ const o=pmStored(),id=pmImgId(pmCurImg(slot)),k=pmKey(slot,id);o[k]=Object.assign(pmPos(slot),patch);
  try{localStorage.setItem(PM_POS_KEY,JSON.stringify(o))}catch(e){}
  console.log('[PM_POS] '+k,o[k])}
 function pmResetPos(){
- const o=pmStored();['l','c','r'].forEach(s=>delete o[pmKey(s)]);
+ const o=pmStored();
+ ['l','c','r'].forEach(s=>{delete o[pmKey(s)];const id=pmImgId(pmCurImg(s));if(id)delete o[pmKey(s,id)]});
  try{localStorage.setItem(PM_POS_KEY,JSON.stringify(o))}catch(e){}
  pmApplyPos()}
 function pmCopyPos(){
- const o={};['l','c','r'].forEach(s=>o[s]=pmPos(s));
- const txt='['+(window.__pmScene||'pm')+'] '+JSON.stringify(o);
+ // 📋 ดึงพิกัดของทุกตัวละครที่เคยลากปรับในฉากนี้ (ไม่ใช่แค่ตัวที่โชว์อยู่ตอนกดคัดลอก) เพื่อไม่ให้ตกหล่นเวลาช่องเดียวกันมีหลายภาพ เช่น r ของ s5pm มีทั้งตาวิคกับโจ
+ const scene=window.__pmScene||'pm',st=pmStored(),o={};
+ Object.keys(st).forEach(k=>{if(k.indexOf(scene+'_')===0)o[k.slice(scene.length+1)]=st[k]});
+ ['l','c','r'].forEach(s=>{const id=pmImgId(pmCurImg(s)),key=s+(id?('__'+id):'');if(!(key in o))o[key]=pmPos(s)});
+ if(!('box' in o))o.box=pmPos('box');
+ const txt='['+scene+'] '+JSON.stringify(o);
  const done=()=>showToast('📋 คัดลอกตำแหน่ง/ขนาดแล้ว! วางส่งในแชทได้เลย','gold');
  const fail=()=>{try{window.prompt('คัดลอกข้อความนี้ส่งในแชท:',txt)}catch(e){}};
  try{navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt).then(done).catch(fail):fail()}catch(e){fail()}}
@@ -3636,6 +3734,21 @@ function pmApplyPos(){
   else{im.style.setProperty('--pmx',p.dx+'px');im.style.setProperty('--pmy',p.dy+'px');im.style.setProperty('--pms',p.sc)}});
  const box=ov.querySelector('.pm-box');
  if(box){const p=pmPos('box');box.style.transform=`translate(${p.dx}px,${p.dy}px) scale(${p.sc})`}}
+// 🫨 สั่นเบาๆ ต่อจากตำแหน่ง/ขนาดจริง (ไม่ใช่ CSS animation เพราะจะไปทับ transform ที่ตั้งจาก dx/dy/sc)
+let PM_TREMBLE=null;
+function pmTrembleStop(){if(PM_TREMBLE){cancelAnimationFrame(PM_TREMBLE.raf);PM_TREMBLE=null}}
+function pmTrembleStart(slot){
+ if(PM_TREMBLE&&PM_TREMBLE.slot===slot)return;
+ pmTrembleStop();
+ const t0=performance.now();
+ const step=()=>{
+  if(!PM_TREMBLE||PM_TREMBLE.slot!==slot)return;
+  const ov=document.querySelector('.pm-ov'),slotEl=ov&&ov.querySelector('.pm-slot.'+slot),im=slotEl&&slotEl.querySelector('.pm-port');
+  if(!im){pmTrembleStop();return}
+  const p=pmPos(slot),t=(performance.now()-t0)/1000;
+  im.style.transform=`translate(${p.dx+Math.sin(t*40)*1.5}px,${p.dy+Math.cos(t*53)*1.2}px) scale(${p.sc})`;
+  PM_TREMBLE.raf=requestAnimationFrame(step)};
+ PM_TREMBLE={slot,raf:requestAnimationFrame(step)}}
 function pmScaleBtn(slot){
  return PM_EDIT?`<div class="pm-sz" data-slot="${slot}"><button onclick="event.stopPropagation();pmNudgeScale('${slot}',-0.08)">➖</button><button onclick="event.stopPropagation();pmNudgeScale('${slot}',0.08)">➕</button></div>`:''}
 function pmNudgeScale(slot,d){
@@ -3663,6 +3776,7 @@ function pmUp(){
  PM_DRAG=null}
 function showPostMatch(script,next,cls){
  const old=document.querySelector('.pm-ov');if(old)old.remove();
+ pmTrembleStop();
  window.__pmIdx=0;window.__pmNext=next;window.__pmScript=script;window.__pmScene=cls||'pm';
  $('app').insertAdjacentHTML('beforeend','<div class="pm-ov'+(cls?' '+cls:'')+(PM_EDIT?' pm-edit':'')+'" onclick="pmTap()"><div class="pm-stage"><div class="pm-slot l"></div><div class="pm-slot c"></div><div class="pm-slot r"></div></div><div class="pm-box speechbox" onpointerdown="pmDown(event,&quot;box&quot;)"></div>'+(PM_EDIT?'<div class="pm-tip">⠿ ลากตัวละครย้ายตำแหน่ง · ➕➖ ปรับขนาด · <span onclick="event.stopPropagation();pmCopyPos()">📋 คัดลอกพิกัด</span> · <span onclick="event.stopPropagation();pmResetPos()">↺ รีเซ็ต</span></div>':'')+'</div>');
  pmRender()}
@@ -3677,7 +3791,8 @@ function pmRender(){
   if(slot.dataset.k!==key){
    slot.dataset.k=key;
    slot.innerHTML=imgs?`<img class="pm-port${d.cr&&s==='c'?' r':''}${/Gump4\.webp$/.test(imgs[0])?' pant':''}" src="${imgs[0]}" alt="" draggable="false" data-alt="${imgs.slice(1).join('|')}" ${PM_EDIT?'style="animation:none;opacity:1"':''} onerror="pmImgFail(this)" onload="pmImgLoad(this)" onpointerdown="pmDown(event)">${pmScaleBtn(s)}`:''}
-  const im=slot.firstElementChild;if(im){im.classList.toggle('dim',!!d.sp&&d.sp!==s);im.classList.toggle('tremble',!!d.shake&&d.sp===s)}});
+  const im=slot.firstElementChild;if(im){im.classList.toggle('dim',!!d.sp&&d.sp!==s);
+   if(d.shake&&d.sp===s)pmTrembleStart(s);else if(PM_TREMBLE&&PM_TREMBLE.slot===s)pmTrembleStop()}});
  pmApplyPos();
  const box=ov.querySelector('.pm-box');
  const nm=d.who||(playerName()+(d.tag?' ('+d.tag+')':''));
@@ -3685,7 +3800,8 @@ function pmRender(){
  box.style.borderStyle=d.think?'dashed':'';
  box.dataset.anchor=d.sp||'c';                                   // หางบับเบิ้ลชี้ไปหาตัวละครที่พูด (l/c/r); ไม่ระบุ = กล่องกลางจอ
  const spkCol=(!d.who||d.who.indexOf(playerName())===0)?'#3df2ff':d.who.indexOf('มายา')===0?'#ff8ad8':d.who.indexOf('โจ')===0?'#ff9a3d':(d.who.indexOf('โค้ช')===0||d.who.indexOf('วิค')>=0)?'#ff334b':'';
- box.innerHTML=`<span class="spkname"${spkCol?` style="color:${spkCol}"`:''}>${nm}</span><p>${d.text}</p><div class="pm-tap">แตะหน้าจอเพื่อไปต่อ ▶</div>${PM_EDIT?`<div class="pm-grip" onpointerdown="event.stopPropagation();pmDown(event,'box')">⠿</div><div class="pm-sz pm-sz-box"><button onclick="event.stopPropagation();pmNudgeScale('box',-0.06)">➖</button><button onclick="event.stopPropagation();pmNudgeScale('box',0.06)">➕</button></div>`:''}`}
+ box.innerHTML=`<span class="spkname"${spkCol?` style="color:${spkCol}"`:''}>${nm}</span><p>${d.text}</p><div class="pm-tap">แตะหน้าจอเพื่อไปต่อ ▶</div>${PM_EDIT?`<div class="pm-grip" onpointerdown="event.stopPropagation();pmDown(event,'box')">⠿</div><div class="pm-sz pm-sz-box"><button onclick="event.stopPropagation();pmNudgeScale('box',-0.06)">➖</button><button onclick="event.stopPropagation();pmNudgeScale('box',0.06)">➕</button></div>`:''}`;
+ if(d.giveCow)s6gPlayGiveAnim()}
 // กัมป์หอบ (Gump4.webp): วางหยดเหงื่อตามขนาดภาพจริงหลังภาพเลื่อนเข้าเสร็จ
 function pmImgLoad(img){if(img.classList.contains('pant'))setTimeout(()=>pmSweat(img),450)}
 function pmSweat(img){
@@ -3705,6 +3821,7 @@ function pmTap(){
  window.__pmIdx++;
  if(window.__pmIdx>=(window.__pmScript||[]).length){
   const ov=document.querySelector('.pm-ov');if(ov)ov.remove();
+  pmTrembleStop();
   const n=window.__pmNext;window.__pmNext=null;if(n)n();return}
  pmRender()}
 
@@ -4033,7 +4150,7 @@ function scrMapRender(){
                     <div class="prof-desc">Lv.${S.lv} · 💰 ${baht(S.mp||0)}</div>
                 </div>
             </div>
-            <div style="display:flex;gap:6px">${S.story.s6GachaIntro?'<button class="btn-g" style="padding:8px 12px; font-size:14px; border-radius:10px;" onclick="openS6Gacha(\'free\')">🎪</button>':''}<button class="btn-g" style="padding:8px 12px; font-size:14px; border-radius:10px;" onclick="scrTrophy('map')">🏆</button></div>
+            <div style="display:flex;gap:6px">${S.story.s6GachaUnlocked?'<button class="btn-g" style="padding:8px 12px; font-size:14px; border-radius:10px;" onclick="openS6Gacha(\'free\')">🎪</button>':''}<button class="btn-g" style="padding:8px 12px; font-size:14px; border-radius:10px;" onclick="scrTrophy('map')">🏆</button></div>
         </div>
         
                        <!-- แถบค่าพลังใหม่ (ขอบเข้ม ด้านในลางๆ แยกสี) 4 ช่อง -->
@@ -4095,6 +4212,11 @@ else if(i===2&&s3PreNeeded()){R.busy=true;showS3Pre(()=>{if(R)drawCards()})}
 else if(i===3&&s4PreNeeded()){R.busy=true;showS4Pre(()=>{if(R)drawCards()})}   // ด่าน 3 รอบแรก: คัตซีน Pick.webp (มีปุ่มข้าม) → ขึ้นเลือกแผนต่อทันที
 else if(i===4&&s5PreNeeded()){R.busy=true;showS5Pre(()=>{if(R)drawCards()})}   // ด่าน 5 รอบแรก: คัตซีน Troom.webp (ลากกล่องข้อความได้) → ขึ้นเลือกแผนต่อทันที
 else if(i===5&&!S.story.s6GachaIntro){R.busy=true;showPostMatch(S6G_PRE1,()=>showPostMatch(S6G_PRE2,()=>openS6Gacha('intro',()=>{if(R)drawCards()}),'s6gzoom'),'s6gpre')}   // ด่าน 6 รอบแรก: บทนำ + ตู้คีบตุ๊กตา (บังคับได้ควาย 100%) → ปลดล็อกปุ่ม 🎪 → เข้าเกม
+else if(i===6&&s7PreNeeded()){R.busy=true;if(typeof window.startPreChapter7==='function'){window.startPreChapter7(()=>{if(R)drawCards()})}else{drawCards()}}
+else if(i===7&&s8PreNeeded()){R.busy=true;if(typeof window.startPreChapter8==='function'){window.startPreChapter8(()=>{if(R)drawCards()})}else{drawCards()}}
+else if(i===8&&s9PreNeeded()){R.busy=true;if(typeof window.startPreChapter9==='function'){window.startPreChapter9(()=>{if(R)drawCards()})}else{drawCards()}}
+else if(i===9&&s10PreNeeded()){R.busy=true;if(typeof window.startPreChapter10==='function'){window.startPreChapter10(()=>{if(R)drawCards()})}else{drawCards()}}
+else if(i===10&&s11PreNeeded()){R.busy=true;if(typeof window.startPreChapter11==='function'){window.startPreChapter11(()=>{if(R)drawCards()})}else{drawCards()}}
 else drawCards();
 save() }
 /* ================= ♾️ ENDLESS ================= */
@@ -4106,6 +4228,7 @@ function endlessRoundDefs(round){
  return d}
 function endlessInit(){
  R.endless=true;R.round=0;R.gkBase=STAGES[ENDLESS_IDX].gk;
+ R.moneyMul=(R.moneyMul||1)*0.5;   // 💰 ฟาร์มเงินใน Endless ได้แค่ 50% ของสูตรปกติ (กันฟาร์มเงินไวเกิน)
  R.defs=endlessRoundDefs(0);R.bgClass=endlessPickBg(null);
  for(let n=1;n<=ENDLESS.DEF_IMGS;n++)new Image().src='Def'+n+'.webp';                 // พรีโหลดภาพ กันกระตุกตอนสุ่ม
  [61,62,63].forEach(n=>new Image().src='Def'+n+'.webp');                              // พรีโหลดภาพกำแพงทีม (ใช้ถ้าผ่านด่าน 6 แล้ว)
@@ -4183,7 +4306,7 @@ function pitchHTML(e){
  const showFoe=sc!=='travel';
  const foeCls='guard';
  const ghosts=sc==='wDRB'?[1,2,3].map(i=>`<div class="hero ghost g${i}"><div class="lean sp">${gameHeroSVG('run')}</div></div>`).join(''):'';
- return `<div class="pitch ${spd} s-${sc}${heroIsFat()?' fat':''}${sc==='wDRB'&&R.driftFx?' drift':''}${sc==='wPSS'&&e.gk?' gkshot':''}${(R.cutin==='save'||R.cutin==='brk')?' hideball':''}" style="${heroVars(sc)}" onclick="skipAnim()">
+ return `<div class="pitch ${spd} s-${sc}${heroIsFat()?' fat':''}${sc==='wDRB'&&R.driftFx?' drift':''}${sc==='wPSS'&&e.gk?' gkshot':''}${(R.cutin==='save'||R.cutin==='save1'||R.cutin==='save2'||R.cutin==='brk')?' hideball':''}${R.cutin==='save1'?' eqk':''}" style="${heroVars(sc)}" onclick="skipAnim()">
  <div class="crowd"></div><div class="stand"></div><div class="mow"></div><div class="mowlines"></div><div class="blades"></div><div class="stripes"></div>
  <div class="hline" style="top:30%"></div><div class="hline" style="bottom:4%"></div>
  <div class="vignette"></div>
@@ -4208,7 +4331,7 @@ function pitchHTML(e){
  ${R.cardToast?(()=>{const col={stat:'#ffd54a',help:'#4ea8ff',atk:'#ff7a3d',risk:'#ff5566'}[R.cardToast.t]||'#ffd54a',
  elapsed=Date.now()-R.cardToast.at;
  return `<div class="cardtoast" style="--tc:${col};animation-delay:${-elapsed}ms">ได้รับ: <b>${R.cardToast.n}</b></div>`})():''}
- ${R.cutin?(R.cutin==='zero'?S3_CUTIN_HTML:R.cutin==='maya'?S4_CUTIN_HTML:R.cutin==='mika'?S5_CUTIN_HTML:R.cutin==='save'?S5_CUTIN_SAVE_HTML:R.cutin==='brk'?S5_CUTIN_BRK_HTML:S2_CUTIN_HTML):''}
+ ${R.cutin?(R.cutin==='zero'?S3_CUTIN_HTML:R.cutin==='maya'?S4_CUTIN_HTML:R.cutin==='mika'?S5_CUTIN_HTML:R.cutin==='save'?S5_CUTIN_SAVE_HTML:R.cutin==='save1'?S5_CUTIN_SAVE1_HTML:R.cutin==='save2'?S5_CUTIN_SAVE2_HTML:R.cutin==='brk'?S5_CUTIN_BRK_HTML:S2_CUTIN_HTML):''}
  ${R.btFx&&sc==='bt'?'<div class="btFx"></div>':''}
  ${R.fbFx?'<div class="btFx fbFx"><i class="fbTxt">...ความทรงจำ...</i></div>':''}
  ${(R.bubble&&Date.now()-R.bubble.at<R.bubble.dur)?bubbleHTML(R.bubble):''}
@@ -4952,7 +5075,12 @@ function winStage(){
  if(isStage3()&&!s3Seen('post')){s3Mark('post');S.story.s3Done=true;save();return showPostMatch(S3_POST,()=>showWinImage(winStageProcess),'s3pm')}   // ด่าน 3: รอบแรกเท่านั้น
  if(isStage4()&&!s4Seen('post')){s4Mark('post');S.story.s4Done=true;save();return showPostMatch(S4_POST,()=>showWinImage(winStageProcess),'s4pm')}   // ด่าน 4: รอบแรกเท่านั้น
  if(isStage5()&&!s5Seen('post')){s5Mark('post');S.story.s5Done=true;save();return showPostMatch(S5_POST,()=>showWinImage(winStageProcess),'s5pm')}   // ด่าน 5: รอบแรกเท่านั้น
- if(isStage6()&&!s6Seen('post')){s6Mark('post');S.story.s6Done=true;save();return showPostMatch(S6_POST,()=>showS6Kai(()=>showWinImage(winStageProcess)),'s6pm')}   // ด่าน 6: รอบแรกเท่านั้น — จบด้วยรายงานลับของมายา
+ if(isStage6()&&!s6Seen('post')){s6Mark('post');S.story.s6Done=true;save();const next=()=>showWinImage(winStageProcess);if(typeof window.startPostChapter6==='function'){return window.startPostChapter6(next)}else{return next()}}   // ด่าน 6: รอบแรกเท่านั้น — เนื้อเรื่องอยู่ที่ ./post/ch6.js
+ if(isStage7()&&!s7Seen('post')){s7Mark('post');S.story.s7Done=true;save();const next=()=>showWinImage(winStageProcess);if(typeof window.startPostChapter7==='function'){return window.startPostChapter7(next)}else{return next()}}
+ if(isStage8()&&!s8Seen('post')){s8Mark('post');S.story.s8Done=true;save();const next=()=>showWinImage(winStageProcess);if(typeof window.startPostChapter8==='function'){return window.startPostChapter8(next)}else{return next()}}
+ if(isStage9()&&!s9Seen('post')){s9Mark('post');S.story.s9Done=true;save();const next=()=>showWinImage(winStageProcess);if(typeof window.startPostChapter9==='function'){return window.startPostChapter9(next)}else{return next()}}
+ if(isStage10()&&!s10Seen('post')){s10Mark('post');S.story.s10Done=true;save();const next=()=>showWinImage(winStageProcess);if(typeof window.startPostChapter10==='function'){return window.startPostChapter10(next)}else{return next()}}
+ if(isStage11()&&!s11Seen('post')){s11Mark('post');S.story.s11Done=true;save();const next=()=>showWinImage(winStageProcess);if(typeof window.startPostChapter11==='function'){return window.startPostChapter11(next)}else{return next()}}
  showWinImage(winStageProcess)}
 function winStageProcess(){
  R.over=true;clearTimeout(TIMER);
@@ -5133,7 +5261,7 @@ const scriptCa11 = [
   { mode: 'narration', name: 'บรรยาย', text: '(เสียงนกหวีดเริ่มครึ่งหลังดังขึ้น โค้ชเปลี่ยนตัวคนอื่นลงจนครบโควตา ปล่อยกัมป์นั่งทิ้งไว้ข้างสนามตามเดิม)' },
   { mode: 'talk_gum', name: 'กัมป์', text: '...' },
   { mode: 'talk_maya', name: 'มายา', text: 'วันนี้ก็คงได้แค่นี้ . . . . . ไว้แมตช์หน้า' },
-  { mode: 'talk_gum', name: 'กัมป์ (ในใจ)', text: '(...ผมแค่อยากเล่นบอล)', fit: true },
+  { mode: 'talk_gum', name: 'กัมป์ (ในใจ)', text: '(.......อยากเล่น)', fit: true },
   { mode: 'end', name: 'SYSTEM', text: '[ ​และนั่นคือครั้งสุดท้ายที่เขานั่งดู... สู่แมตช์พิสูจน์ตัวเอง!]' }
 ];
 
@@ -5526,5 +5654,11 @@ function handleCa12Tap() {
   }
 }
 </script>
+<script src="./post/ch6.js"></script>
+<script src="./pre/ch7.js"></script>  <script src="./post/ch7.js"></script>
+<script src="./pre/ch8.js"></script>  <script src="./post/ch8.js"></script>
+<script src="./pre/ch9.js"></script>  <script src="./post/ch9.js"></script>
+<script src="./pre/ch10.js"></script> <script src="./post/ch10.js"></script>
+<script src="./pre/ch11.js"></script> <script src="./post/ch11.js"></script>
 </body>
 </html>
