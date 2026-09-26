@@ -1,11 +1,28 @@
 /* ============================================================
    post/ch6.js
    After-match story for Stage 6 (Netherlands)
-   Depends on: showPostMatch, playerName (index.html)
+   Depends on: showPostMatch, playerName, PM_LOCKED_POS (index.html)
+   หมายเหตุ: inject พิกัด [s6pm] เข้า PM_LOCKED_POS เองจากไฟล์นี้
+             ไม่ต้องแก้ index.html
    ============================================================ */
 
 (function () {
   'use strict';
+
+  /* ---------- 💉 ฉีดพิกัด [s6pm] เข้า PM_LOCKED_POS ของ index.html ----------
+     PM_LOCKED_POS ถูกประกาศด้วย const ที่ top-level ของ classic script
+     → อยู่ใน global lexical scope ที่แชร์กันทุก script บนหน้าเว็บ
+     → จากไฟล์นี้มองเห็นและแก้ property ได้เลย (ติดแค่ห้าม reassign ตัวแปร) */
+  (function patchS6pmCoords(){
+    try {
+      if (typeof PM_LOCKED_POS === 'object' && PM_LOCKED_POS) {
+        PM_LOCKED_POS.s6pm_l__eyejo    = { dx: 84.16007232666016, dy: -247.11105346679688, sc: 2.2 };
+        PM_LOCKED_POS.s6pm_r__gumpzen2 = { dx: 12.018020629882812, dy: -6.4715576171875,  sc: 1   };
+        PM_LOCKED_POS.s6pm_c           = { dx: 0,                   dy: 0,                   sc: 1   };
+        PM_LOCKED_POS.s6pm_box         = { dx: 0,                   dy: 0,                   sc: 1   };
+      }
+    } catch (e) { /* ถ้า PM_LOCKED_POS ยังไม่โหลด (โหลดไฟล์ช้า) ก็ข้ามไป — ค่า default จะถูกใช้ */ }
+  })();
 
   /* ---------- Asset filenames ---------- */
   var IMG = {
@@ -34,7 +51,6 @@
       '.ch6-phone-bg{position:absolute;inset:0;width:100%;height:100%;',
         'object-fit:cover;object-position:center;opacity:.92;z-index:0;}',
 
-      /* KAI screen */
       '.ch6-screen{position:absolute;left:22%;right:38%;top:17%;bottom:40%;',
         'z-index:4;padding:14px 14px 12px;border-radius:14px;',
         'background:rgba(3,12,8,.94);',
@@ -71,7 +87,6 @@
       '.ch6-send.show{opacity:1;transform:translateY(0);}',
       '.ch6-send:hover{background:rgba(74,255,160,.32);}',
 
-      /* Cow */
       '.ch6-cow{position:absolute;left:1%;top:8%;width:30%;z-index:3;',
         'filter:drop-shadow(0 6px 16px rgba(0,0,0,.7));',
         'animation:ch6Up .55s ease .55s both;}',
@@ -102,13 +117,11 @@
         '40%{transform:translateY(-4px) rotate(-4deg)}',
         '100%{transform:translateY(0) rotate(0)}}',
 
-      /* Maya face */
       '.ch6-maya{position:absolute;right:-4%;top:4%;width:34%;z-index:3;',
         'filter:drop-shadow(0 8px 18px rgba(0,0,0,.7)) brightness(.92);opacity:0;',
         'animation:ch6Up .55s ease .35s forwards;}',
       '.ch6-maya img{width:100%;height:auto;display:block;}',
 
-      /* Inner voice bubble */
       '.ch6-voice{position:absolute;top:2%;right:30%;max-width:70%;',
         'padding:8px 14px;border-radius:14px 14px 4px 14px;',
         'background:linear-gradient(135deg,rgba(255,138,216,.22),rgba(255,180,90,.14));',
@@ -121,7 +134,6 @@
         'transition:opacity .35s ease,transform .35s ease;z-index:7;}',
       '.ch6-voice.show{opacity:1;transform:translateY(0);}',
 
-      /* REPORT SENT */
       '.ch6-sent{position:absolute;inset:0;z-index:6;',
         'display:flex;align-items:center;justify-content:center;',
         'background:rgba(0,18,10,.94);font-family:"Courier New",monospace;',
@@ -129,7 +141,6 @@
         'font-weight:700;text-shadow:0 0 16px #4affa0,0 0 30px #4affa0;',
         'opacity:0;animation:ch6Fade .4s ease .05s forwards;}',
 
-      /* Fade */
       '.ch6-fade{position:fixed;inset:0;background:#000;z-index:10000;',
         'opacity:0;transition:opacity 2s ease;pointer-events:none;}',
 
@@ -189,7 +200,6 @@
       }, dur || 1600);
     }
 
-    /* Timeline */
     setTimeout(function () { document.querySelector('.ch6-line-1').classList.add('in'); }, 200);
     setTimeout(function () { document.querySelector('.ch6-line-2').classList.add('in'); }, 550);
     setTimeout(function () { document.querySelector('.ch6-line-3').classList.add('in'); }, 900);
