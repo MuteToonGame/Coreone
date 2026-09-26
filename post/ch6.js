@@ -14,7 +14,7 @@
     eyeJo:     'EyeJo.webp',
     mayaSad:   'Mayasad.webp',
     maya:      'Maya11.webp',
-    mayaHand:  'MayaHand.webp',
+    mayaHand:  'Mayahand.webp',
     cow:       'Buff1.webp'
   };
 
