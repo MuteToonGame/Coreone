@@ -69,10 +69,10 @@
     showPostMatch([
       { who: 'โจ',   l: [IMG.jo],     sp: 'l', text: 'ในที่สุดก็ผ่านได้...' },
       { who: 'มายา', r: [IMG.maya12], sp: 'r', text: 'คุณสลับท่า... สเปนอ่านไม่ทัน' },
-      { who: 'กัมป์', l: [IMG.gump4],  sp: 'l', text: '...ขอบใจ' },
+      { who: 'null', l: [IMG.gump4],  sp: 'l', text: '...ขอบใจ' },
       { who: 'วิค',  r: [IMG.vik12],  sp: 'r', text: '...',
         tag: 'มองกัมป์ 2 วิ → เดินออก' },
-      { who: 'กัมป์', l: [IMG.gump5],  sp: 'l', text: '...' }
+      { who: 'null', l: [IMG.gump5],  sp: 'l', text: '...' }
     ], function () {
       fadeToBlack(next);
     }, 's7pm');
