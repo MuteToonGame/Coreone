@@ -392,9 +392,8 @@ function skipAll() {
     tap();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
-  }
+  window.startPreChapter8 = function (next) {
+    document.querySelectorAll('.s8-wrap').forEach(el => el.remove());
+    boot(next);
+  };
 })();
