@@ -1,13 +1,14 @@
 /* ============================================================
-   post/ch8.js — ฉากจบด่าน 8 (LOCKED POSITIONS)
-   - พิกัด/ขนาด ล็อคจากค่า [s8pm]
-   - ตัดระบบลาก/ตัวเลื่อน/แก้ไขทั้งหมดออกแล้ว
+   post/ch8.js — ฉากจบด่าน 8 (LOCKED POSITIONS · FINAL v2)
+   - ล็อคพิกัด/ขนาดจาก [s8pm]
+   - maya11: sc = 1.22 (แก้จาก 1.16 — ชดเชย outline padding)
+   - ตัดระบบ edit/localStorage/drag ออกทั้งหมด
    - เรียกใช้: window.startPostChapter8(next)
    ============================================================ */
 (function () {
   'use strict';
 
-  /* ---------- inject CSS (self-contained) ---------- */
+  /* ---------- inject CSS ---------- */
   if (!document.getElementById('ch8PostCSS')) {
     var st = document.createElement('style');
     st.id = 'ch8PostCSS';
@@ -53,23 +54,7 @@
       '@keyframes pmInR{from{opacity:0;transform:translate(calc(36px + var(--pmx,0px)),var(--pmy,0px)) scale(var(--pms,1))}to{opacity:1;transform:translate(var(--pmx,0px),var(--pmy,0px)) scale(var(--pms,1))}}',
 
       '.ch8-fade{position:fixed;inset:0;background:#000;z-index:10000;',
-        'opacity:0;transition:opacity 2s ease;pointer-events:none;}',
-
-      '.itemToast{position:fixed;transform:translate(-50%,-200%);z-index:55;',
-        'padding:8px 16px;border-radius:11px;max-width:88vw;text-align:center;',
-        'background:linear-gradient(160deg,rgba(24,12,34,.96),rgba(10,5,18,.96));',
-        'border:1.5px solid var(--tc,#ffd54a);color:#fff;',
-        'font-family:"Kanit",sans-serif;font-size:13px;font-weight:700;',
-        'letter-spacing:.2px;line-height:1.35;',
-        'box-shadow:0 0 14px var(--tc,rgba(255,213,74,.6)),0 6px 18px rgba(0,0,0,.5);',
-        'pointer-events:none;',
-        'animation:itemToastAnim 4.2s cubic-bezier(.2,.9,.3,1.15) forwards}',
-      '@keyframes itemToastAnim{',
-        '0%{opacity:0;transform:translate(-50%,-200%) scale(.92)}',
-        '8%{opacity:1;transform:translate(-50%,4%) scale(1.04)}',
-        '13%{transform:translate(-50%,0) scale(1)}',
-        '88%{opacity:1;transform:translate(-50%,0)}',
-        '100%{opacity:0;transform:translate(-50%,-35%) scale(.95)}}'
+        'opacity:0;transition:opacity 2s ease;pointer-events:none;}'
     ].join('');
     document.head.appendChild(st);
   }
@@ -77,27 +62,19 @@
   /* ---------- util ---------- */
   function playerName(){ return 'กัมป์'; }
 
-  var TOAST_COLORS = {gold:'#ffd54a', info:'#4ea8ff', bad:'#ff5566', buff:'#3df2ff'};
-  function showToast(msg,colorKey){
-    var old=document.getElementById('itemToast'); if(old)old.remove();
-    document.body.insertAdjacentHTML('beforeend',
-      '<div id="itemToast" class="itemToast" style="--tc:'+(TOAST_COLORS[colorKey]||'#ffd54a')+';top:14px;left:50vw;">'+msg+'</div>');
-    setTimeout(function(){var e=document.getElementById('itemToast');if(e&&e.parentNode)e.remove()},4200);
-  }
-
   /* ============================================================
-     PM_LOCKED_POS — ล็อคจาก [s8pm]
-     key = "<scene>_<slot>" หรือ "<scene>_<slot>__<imgId>"
+     PM_LOCKED_POS — FINAL
+     - maya11: sc = 1.22 (ชดเชย padding รอบตัวจาก outline)
      ============================================================ */
   var PM_LOCKED_POS = {
-    's8pm_l__gump4':   { dx:-1.7777786254882812, dy:9.17327859375,     sc:0.84 },
-    's8pm_r__jo':      { dx:9.545150756835938,   dy:1.63580322265625,  sc:0.92 },
-    's8pm_r__vik1224': { dx:-10.776519775390625, dy:34.5882568359375,  sc:1.72 },
-    's8pm_l__gump5':   { dx:0,                   dy:0,                  sc:0.84 },
-    's8pm_r__vik12':   { dx:-13.1156005859375,   dy:30.475799560546875, sc:1.64 },
-    's8pm_r__maya6':   { dx:11.893402099609375,  dy:7.431243896484375,  sc:1.16 },
-    's8pm_r__maya11':  { dx:11.893402099609375,  dy:7.431243896484375,  sc:1.16 }, /* ใช้ค่าเดียวกับ maya6 (ไม่มีใน [s8pm]) */
-    's8pm_r__maya12':  { dx:13.4600830078125,    dy:11.9822998046875,   sc:1.24 },
+    's8pm_l__gump4':   { dx:-1.7777786254882812, dy:9.17327880859375,     sc:0.84 },
+    's8pm_r__jo':      { dx:9.545150756835938,   dy:1.63580322265625,    sc:0.92 },
+    's8pm_r__vik1224': { dx:-10.776519775390625, dy:34.5882568359375,    sc:1.72 },
+    's8pm_l__gump5':   { dx:0,                   dy:0,                    sc:0.84 },
+    's8pm_r__vik12':   { dx:-13.1156005859375,   dy:30.475799560546875,  sc:1.64 },
+    's8pm_r__maya6':   { dx:11.893402099609375,  dy:7.431243896484375,   sc:1.16 },
+    's8pm_r__maya11':  { dx:11.893402099609375,  dy:7.431243896484375,   sc:1.22 },  /* ← +5% */
+    's8pm_r__maya12':  { dx:13.4600830078125,    dy:11.9822998046875,    sc:1.24 },
     's8pm_c':          { dx:0, dy:0, sc:1 },
     's8pm_box':        { dx:0, dy:0, sc:1 }
   };
@@ -214,7 +191,6 @@
     pmRender();
   }
 
-  /* expose สำหรับ onclick ใน HTML string */
   window.pmTap     = pmTap;
   window.pmImgFail = pmImgFail;
 
@@ -233,7 +209,7 @@
   }
 
   /* ============================================================
-     post/ch8 — เนื้อเรื่องฉากจบด่าน 8
+     post/ch8 — เนื้อเรื่อง
      ============================================================ */
   var IMG = {
     jo:        'Jo.webp',
