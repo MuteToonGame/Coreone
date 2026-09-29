@@ -251,7 +251,7 @@
   /* --------------------------------------------------------------------------
      🚀 BOOT
      -------------------------------------------------------------------------- */
-  function boot() {
+  function boot(next) {
     /* 1) inject CSS */
     const style = document.createElement('style');
     style.textContent = CSS;
@@ -361,25 +361,28 @@
     }
 
     function finish() {
-      const fade = stage.querySelector('.s8-fade');
-      const hint = stage.querySelector('.s8-hint');
-      if (hint) hint.style.display = 'none';
-      if (fade) fade.classList.add('on');
-      setTimeout(() => {
-        stage.onclick = () => {
-          stage.style.transition = 'opacity .4s ease';
-          stage.style.opacity = '0';
-          setTimeout(() => { wrap.style.display = 'none'; }, 420);
-        };
-      }, 1200);
-    }
+  const fade = stage.querySelector('.s8-fade');
+  const hint = stage.querySelector('.s8-hint');
+  if (hint) hint.style.display = 'none';
+  if (fade) fade.classList.add('on');
+  setTimeout(() => {
+    stage.style.transition = 'opacity .4s ease';
+    stage.style.opacity = '0';
+    setTimeout(() => {
+      wrap.remove();
+      if (typeof next === 'function') next();
+    }, 420);
+  }, 1200);
+}
 
-    function skipAll() {
-      stage.style.transition = 'opacity .3s ease';
-      stage.style.opacity = '0';
-      setTimeout(() => { wrap.style.display = 'none'; }, 320);
-    }
-
+function skipAll() {
+  stage.style.transition = 'opacity .3s ease';
+  stage.style.opacity = '0';
+  setTimeout(() => {
+    wrap.remove();
+    if (typeof next === 'function') next();
+  }, 320);
+}
     /* 7) events */
     stage.addEventListener('click', tap);
     const skip = stage.querySelector('.s8-skip');
