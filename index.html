@@ -6182,7 +6182,14 @@ ${R.maxMissStreak?`<p class="small gold">🎯 ฮึดสูงสุด ×${R.
  <button class="btn-y" onclick="scrTrophy('map')">🏆 หอเกียรติยศ</button>
 <button onclick="scrMap()">🗺 กลับแผนที่</button></div></div>`))))}   // ✨ [LVUP] โชว์บอลลูนเลเวลตอนหน้าสรุปแพ้ขึ้น
 /* (ลบ migratePmPos ออกแล้ว — มันแปลงค่าด้วยขนาดจอของเครื่องนั้นๆ ทำให้แต่ละเครื่องได้ตำแหน่งไม่เท่ากัน) */
-
+try{
+ const _o=JSON.parse(localStorage.getItem('striker_pm_pos_v3')||'{}');
+ let _bad=false;
+ Object.keys(_o).forEach(k=>{const v=_o[k];
+  if(v&&((typeof v.x==='number'&&(v.x<-50||v.x>150))||(typeof v.y==='number'&&(v.y<-80||v.y>130))))_bad=true});
+ if(_bad){localStorage.removeItem('striker_pm_pos_v3');console.warn('🧹 ล้างค่า PM_POS ที่เพี้ยนแล้ว')}
+}catch(e){}
+  
 load();scrTitle();
 if(/buffalo/i.test((location.search||'')+(location.hash||'')))setTimeout(replayBuffalo,400);   // ทดสอบฉากโรงอาหาร Buffalo Crash
 // พรีโหลดวิดีโอเปิดเรื่อง (V1.mp4) ไว้ล่วงหน้าตั้งแต่เปิดหน้าเว็บ เพื่อลดอาการค้าง/โหลดตอนกดเริ่มเกม
