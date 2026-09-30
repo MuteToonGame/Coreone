@@ -4594,12 +4594,13 @@ function pmNudgeScale(slot,d){
 }
 function pmDown(e,which){
  if(!pmEditOn())return;
+ if(e.target.closest&&e.target.closest('.pm-sz'))return;   // แตะปุ่ม ➕➖ → ไม่ลาก
  let slot=which,target=e.currentTarget||e.target;
  if(!slot){
-  const port=e.target.closest&&e.target.closest('.pm-port');
-  if(!port)return; target=port;
-  const wrap=port.closest('.pm-slot');
+  const wrap=e.target.closest&&e.target.closest('.pm-slot');
+  if(!wrap)return;
   slot = wrap.classList.contains('l')?'l' : wrap.classList.contains('r')?'r':'c';
+  target=wrap;
  }
  e.stopPropagation();
  const p=pmPos(slot);
