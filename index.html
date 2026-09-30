@@ -4794,7 +4794,7 @@ function showPostMatch(script,next,cls){
  const old=document.querySelector('.pm-ov');if(old)old.remove();
  pmTrembleStop();
  window.__pmIdx=0;window.__pmNext=next;window.__pmScript=script;window.__pmScene=cls||'pm';
- $('app').insertAdjacentHTML('beforeend','<div class="pm-ov'+(cls?' '+cls:'')+(pmEditOn()?' pm-edit':'')+'" onclick="pmTap()"><div class="pm-canvas"><div class="pm-stage" onpointerdown="pmStageDown(event)"><div class="pm-slot l"></div><div class="pm-slot c"></div><div class="pm-slot r"></div></div><div class="pm-box speechbox" onpointerdown="pmDown(event,&quot;box&quot;)"></div></div>'+(pmEditOn()?'<div class="pm-tip">⠿ ลาก · <span onclick="event.stopPropagation();pmExportPositions()">📤 ส่งออกทุกฉาก</span> · <span onclick="event.stopPropagation();pmResetPos()">↺ รีเซ็ต</span> · <b style="color:#ffd54a">build '+PM_BUILD.slice(-1)+'</b></div>':'')+'</div>');
+ $('app').insertAdjacentHTML('beforeend','<div class="pm-ov'+(cls?' '+cls:'')+(pmEditOn()&&cls!=='s1pm'?' pm-edit':'')+'" onclick="pmTap()"><div class="pm-canvas"><div class="pm-stage" onpointerdown="pmStageDown(event)"><div class="pm-slot l"></div><div class="pm-slot c"></div><div class="pm-slot r"></div></div><div class="pm-box speechbox" onpointerdown="pmDown(event,&quot;box&quot;)"></div></div>'+(pmEditOn()&&cls!=='s1pm'?'<div class="pm-tip">⠿ ลาก · <span onclick="event.stopPropagation();pmExportPositions()">📤 ส่งออกทุกฉาก</span> · <span onclick="event.stopPropagation();pmResetPos()">↺ รีเซ็ต</span> · <b style="color:#ffd54a">build '+PM_BUILD.slice(-1)+'</b></div>':'')+'</div>');
  PM_SEL=null;
  pmFit();pmObserve();pmDbg();
  pmRender()}
