@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ตัวจัดตำแหน่งตัวละคร (Striker Football)</title>
+<style>
+:root{--bg:#0d1220;--card:#182036;--ac:#ffd54a;--tx:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 "Kanit",system-ui,sans-serif;overscroll-behavior:none}
+.top{display:flex;gap:6px;align-items:center;padding:8px;flex-wrap:wrap}
+.top input,.row input,.row select{background:#0a0f1c;border:1px solid #3a4666;color:#fff;border-radius:8px;padding:7px 8px;font:inherit;min-width:0}
+button{font:inherit;border:1.5px solid #6b7aa5;background:#22304f;color:#fff;border-radius:10px;padding:8px 12px;touch-action:manipulation}
+button.on{background:var(--ac);color:#000;border-color:#fff}
+button.big{padding:10px 14px;font-weight:700}
+#wrap{position:relative;margin:0 auto;width:100%;max-width:520px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#st{position:absolute;left:0;top:0;width:450px;height:700px;transform-origin:0 0;overflow:hidden;
+ background:
+  linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px) 0 0/45px 70px,
+  linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px) 0 0/45px 70px,
+  linear-gradient(#1c2b4a,#0f1a30);
+ outline:2px dashed rgba(255,213,74,.6);cursor:grab}
+#st .mid{position:absolute;left:0;right:0;top:350px;border-top:1px dashed rgba(255,255,255,.25)}
+#st .cx{position:absolute;top:0;bottom:0;left:225px;border-left:1px dashed rgba(255,255,255,.25)}
+.slot{position:absolute;pointer-events:none;transform:translateX(-50%);transform-origin:50% 100%}
+.slot img,.slot .ph{height:100%;width:auto;max-width:none;display:block;transform-origin:50% 100%;filter:drop-shadow(0 8px 16px rgba(0,0,0,.6))}
+.slot.sel img,.slot.sel .ph{outline:2px solid var(--ac);outline-offset:-2px}
+.slot .ph{width:260px;background:rgba(255,80,80,.25);border:2px dashed #f66;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;word-break:break-all}
+.badge{position:absolute;left:50%;bottom:45%;margin-left:-22px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.7);border:2px solid #fff;
+ display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;pointer-events:auto;touch-action:none}
+.slot.sel .badge{background:var(--ac);color:#000}
+.panel{max-width:520px;margin:8px auto;padding:0 8px}
+.row{display:flex;gap:6px;align-items:center;margin:6px 0;padding:6px;border-radius:12px;background:var(--card);border:2px solid transparent}
+.row.sel{border-color:var(--ac)}
+.row input{flex:1}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
+.pad button{padding:12px 0;font-size:18px}
+textarea{width:100%;height:150px;background:#050810;color:#7dff7d;border:1px solid #333;border-radius:10px;padding:8px;font:11px/1.4 monospace}
+.hint{opacity:.7;font-size:12px;margin:4px 0}
+</style>
+</head>
+<body>
+<div class="top">
+  <b>ฉาก</b><input id="scene" value="s1pm" size="8">
+  <button id="add">➕ เพิ่มตัว</button>
+  <button id="reset">↺ รีเซ็ตทั้งหมด</button>
+</div>
+
+<div id="wrap"><div id="st"><div class="mid"></div><div class="cx"></div></div></div>
+
+<div class="panel">
+  <div class="hint">เลือกตัวจากรายการด้านล่าง (หรือแตะวงกลมบนตัว) → ลากตรงไหนของกรอบก็ได้ · หรือใช้ปุ่มลูกศรขยับทีละนิด</div>
+  <div id="rows"></div>
+  <div class="pad">
+    <button id="nl">◀</button><button id="nu">▲</button><button id="nd">▼</button><button id="nr">▶</button>
+    <button id="fine">ละเอียด</button>
+    <button id="sm">➖ เล็ก</button><button id="sp">➕ ใหญ่</button><span></span><span></span><span></span>
+  </div>
+  <div class="hint">พิกัดใช้ระบบเดียวกับเกม (เวที 450×700) — ก๊อปข้อความล่างไปวางใน <code>PM_LOCKED_POS</code> ได้เลย</div>
+  <textarea id="out" readonly></textarea>
+  <div style="display:flex;gap:8px;margin-top:6px"><button class="big" id="copy" style="flex:1">📋 คัดลอก</button></div>
+  <div class="hint">รูปต้องอยู่โฟลเดอร์เดียวกับไฟล์นี้ (เช่น Jo.webp, Vik12.webp, Maya11.webp)</div>
+  <div style="height:40px"></div>
+</div>
+
+<script>
+const SW=450,SH=700,KEY='striker_pos_editor_v1';
+// ค่าเริ่มต้นตามตาราง PM_LOCKED_POS ของ s1pm (ด่าน 1 คุยหลังเกม)
+const DEFAULTS=[
+ {slot:'l',file:'Vik12.webp',x:27.69,y:-3.77,h:70,s:1.24},
+ {slot:'c',file:'Jo.webp',   x:51.8, y:1.6,  h:70,s:1.08},
+ {slot:'r',file:'Maya11.webp',x:81,  y:0.83, h:70,s:0.92}
+];
+let chars=[],sel=0,k=1,fine=false;
+try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o&&o.chars&&o.chars.length){chars=o.chars;document.getElementById('scene').value=o.scene||'s1pm'}}catch(e){}
+if(!chars.length)chars=JSON.parse(JSON.stringify(DEFAULTS));
+
+const $=id=>document.getElementById(id),st=$('st'),wrap=$('wrap');
+const id0=f=>(f||'').split('/').pop().replace(/\.[^.]+$/,'').toLowerCase();
+const nice=c=>{const i=id0(c.file);return /^vik|^eyecod|coach/.test(i)?'โค้ช':/^jo/.test(i)?'โจ':/^maya/.test(i)?'มายา':/^gump/.test(i)?'กัมป์':(i||'?').slice(0,4)};
+const r2=v=>Math.round(v*100)/100;
+function save(){try{localStorage.setItem(KEY,JSON.stringify({scene:$('scene').value,chars}))}catch(e){}}
+
+function fit(){k=Math.min(wrap.clientWidth/SW,(innerHeight*0.62)/SH);wrap.style.width=(SW*k)+'px';wrap.style.height=(SH*k)+'px';st.style.transform='scale('+k+')'}
+addEventListener('resize',fit);
+
+function build(){
+  st.querySelectorAll('.slot').forEach(n=>n.remove());
+  chars.forEach((c,i)=>{
+    const d=document.createElement('div');d.className='slot';d.dataset.i=i;
+    d.innerHTML='<img alt="" draggable="false"><div class="badge">'+nice(c)+'</div>';
+    const im=d.querySelector('img');
+    im.onerror=()=>{const p=document.createElement('div');p.className='ph';p.textContent='ไม่พบ '+c.file;im.replaceWith(p)};
+    im.src=c.file;
+    d.querySelector('.badge').addEventListener('pointerdown',e=>{e.stopPropagation();select(i)});
+    st.appendChild(d);
+  });
+  rows();place();out();
+}
+function place(){
+  st.querySelectorAll('.slot').forEach(d=>{
+    const c=chars[+d.dataset.i];
+    d.style.left=c.x+'%';d.style.bottom=c.y+'%';d.style.height=c.h+'%';
+    d.style.zIndex=({l:1,c:2,r:3})[c.slot]||1;
+    const im=d.querySelector('img,.ph');if(im)im.style.scale=c.s;
+    d.classList.toggle('sel',+d.dataset.i===sel);
+    d.querySelector('.badge').textContent=nice(c);
+  });
+}
+function rows(){
+  const R=$('rows');R.innerHTML='';
+  chars.forEach((c,i)=>{
+    const r=document.createElement('div');r.className='row'+(i===sel?' sel':'');
+    r.innerHTML='<button class="'+(i===sel?'on':'')+'">'+nice(c)+'</button>'
+     +'<select>'+['l','c','r'].map(s=>'<option'+(s===c.slot?' selected':'')+'>'+s+'</option>').join('')+'</select>'
+     +'<input value="'+c.file+'" placeholder="ชื่อไฟล์.webp">'
+     +'<button>✕</button>';
+    const [b,sl,inp,x]=[r.children[0],r.children[1],r.children[2],r.children[3]];
+    b.onclick=()=>select(i);
+    sl.onchange=()=>{c.slot=sl.value;place();out();save()};
+    inp.onchange=()=>{c.file=inp.value.trim();save();build()};
+    x.onclick=()=>{chars.splice(i,1);sel=Math.max(0,Math.min(sel,chars.length-1));save();build()};
+    R.appendChild(r);
+  });
+}
+function select(i){sel=i;rows();place()}
+function out(){
+  const sc=$('scene').value.trim()||'scene';
+  const L=[' /* '+sc+' */'];
+  chars.forEach(c=>{const id=id0(c.file);L.push(' '+sc+'_'+c.slot+(id?'__'+id:'')+':{x:'+r2(c.x)+',y:'+r2(c.y)+',h:'+c.h+',s:'+r2(c.s)+'},')});
+  $('out').value=L.join('\n');
+}
+
+// ลาก: เลือกตัวไว้แล้วลากตรงไหนของเวทีก็ได้
+let D=null;
+wrap.addEventListener('pointerdown',e=>{
+  if(!chars[sel])return;
+  D={sx:e.clientX,sy:e.clientY,ox:chars[sel].x,oy:chars[sel].y};
+  try{wrap.setPointerCapture(e.pointerId)}catch(_){}
+});
+wrap.addEventListener('pointermove',e=>{
+  if(!D)return;const c=chars[sel];
+  c.x=r2(D.ox+(e.clientX-D.sx)/(SW*k)*100);
+  c.y=r2(D.oy-(e.clientY-D.sy)/(SH*k)*100);
+  place();out();
+});
+['pointerup','pointercancel'].forEach(t=>wrap.addEventListener(t,()=>{if(D){D=null;save()}}));
+document.addEventListener('touchmove',e=>{if(D&&e.cancelable)e.preventDefault()},{passive:false});
+
+// ปุ่มขยับละเอียด
+function nudge(dx,dy,ds){const c=chars[sel];if(!c)return;const st_=fine?0.2:1;
+  c.x=r2(c.x+dx*st_);c.y=r2(c.y+dy*st_);c.s=r2(Math.max(.3,Math.min(3,c.s+ds*(fine?0.02:0.08))));place();out();save()}
+$('nl').onclick=()=>nudge(-1,0,0);$('nr').onclick=()=>nudge(1,0,0);
+$('nu').onclick=()=>nudge(0,1,0);$('nd').onclick=()=>nudge(0,-1,0);
+$('sm').onclick=()=>nudge(0,0,-1);$('sp').onclick=()=>nudge(0,0,1);
+$('fine').onclick=()=>{fine=!fine;$('fine').classList.toggle('on',fine)};
+
+$('add').onclick=()=>{chars.push({slot:'c',file:'',x:50,y:0,h:70,s:1});sel=chars.length-1;save();build()};
+$('reset').onclick=()=>{if(confirm('รีเซ็ตกลับค่าเริ่มต้น?')){chars=JSON.parse(JSON.stringify(DEFAULTS));sel=0;save();build()}};
+$('scene').onchange=()=>{out();save()};
+$('copy').onclick=()=>{
+  const t=$('out').value,ta=$('out');
+  const ok=()=>{$('copy').textContent='✅ คัดลอกแล้ว';setTimeout(()=>$('copy').textContent='📋 คัดลอก',1500)};
+  try{navigator.clipboard.writeText(t).then(ok).catch(()=>{ta.select();document.execCommand('copy');ok()})}catch(e){ta.select();document.execCommand('copy');ok()}
+};
+fit();build();
+</script>
+</body>
+</html>
