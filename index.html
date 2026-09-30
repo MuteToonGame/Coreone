@@ -4508,6 +4508,8 @@ function pmPos(slot){
  return {x:d.x,y:d.y,h:d.h,s:d.s};   // สำเนา — ห้ามคืน object ต้นฉบับ ไม่งั้นลากทีเดียวค่า default ของทุกฉากเปลี่ยนตาม
 }
 function pmSetPos(slot,patch){
+ if(typeof patch.x==='number')patch.x=Math.max(-30,Math.min(130,patch.x));
+ if(typeof patch.y==='number')patch.y=Math.max(-50,Math.min(110,patch.y));
  const o=pmStored(),id=pmImgId(pmCurImg(slot)),k=pmKey(slot,id);
  o[k]=Object.assign({},pmPos(slot),patch);
  try{localStorage.setItem(PM_POS_KEY,JSON.stringify(o))}catch(e){}
