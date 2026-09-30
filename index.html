@@ -4677,7 +4677,7 @@ function pmMove(e){
  else{
  const nx=Math.max(-30,Math.min(130,+(PM_DRAG.ox+ddx/r.width*100).toFixed(2)));
  const ny=Math.max(-50,Math.min(110,+(PM_DRAG.oy-ddy/r.height*100).toFixed(2)));
- pmSetPos(PM_DRAG.slot,{x:nx,y:ny})}
+ pmSetPos(PM_DRAG.slot,{x:nx,y:ny})}}
 function pmExportPositions(){
  // รวมค่าที่ล็อกไว้ + ค่าที่เพิ่งลากในเครื่องนี้ → ได้ตารางเต็ม วางทับ PM_LOCKED_POS ได้เลย (ไม่ทำฉากอื่นหาย)
  const out=Object.assign({},PM_LOCKED_POS),all=pmStored();
