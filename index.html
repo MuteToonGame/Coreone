@@ -4555,6 +4555,7 @@ function pmCopyPos(){
 }
 function pmApplyPos(){
  const ov=document.querySelector('.pm-ov');if(!ov)return;
+ if(ov.classList.contains('s1pm'))return;   // ← 🔒 ข้าม s1pm (CSS คุมแทน)
  ['l','c','r'].forEach(s=>{
   const slot=ov.querySelector('.pm-slot.'+s);if(!slot)return;
   const p=pmPos(s);
