@@ -4569,7 +4569,23 @@ function pmCopyPos(){
 }
 function pmApplyPos(){
  const ov=document.querySelector('.pm-ov');if(!ov)return;
- if(ov.classList.contains('s1pm'))return;   // ← 🔒 ข้าม s1pm (CSS คุมแทน)
+
+ // 🔒 s1pm — ใช้ S1_LOCKED + inline !important
+ if(ov.classList.contains('s1pm')){
+  ['l','c','r'].forEach(s=>{
+   const slot=ov.querySelector('.pm-slot.'+s);if(!slot)return;
+   const p=S1_LOCKED[s];
+   slot.style.setProperty('left',p.left,'important');
+   slot.style.setProperty('bottom',p.bottom,'important');
+   slot.style.setProperty('height',p.height,'important');
+   slot.style.setProperty('transform','translateX(-50%)','important');
+   slot.style.setProperty('--ps','1','important');
+  });
+  const box=ov.querySelector('.pm-box');
+  if(box)box.style.setProperty('transform','translate(0,-10px) scale(1.05)','important');
+  return;
+ }
+
  ['l','c','r'].forEach(s=>{
   const slot=ov.querySelector('.pm-slot.'+s);if(!slot)return;
   const p=pmPos(s);
@@ -4580,7 +4596,7 @@ function pmApplyPos(){
  });
  const box=ov.querySelector('.pm-box');
  if(box){const p=pmPos('box');box.style.transform=`translate(${p.dx||0}px,${p.dy||0}px) scale(${p.sc||1})`}
-}
+  }
 let PM_TREMBLE=null;
 function pmTrembleStop(){
  if(PM_TREMBLE){
