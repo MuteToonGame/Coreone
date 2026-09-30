@@ -4514,6 +4514,7 @@ function pmSetPos(slot,patch){
  o[k]=Object.assign({},pmPos(slot),patch);
  try{localStorage.setItem(PM_POS_KEY,JSON.stringify(o))}catch(e){}
  console.log('[PM_POS] '+k,o[k]);
+  pmApplyPos();
 }
 // 📐 ย่อ/ขยายผ้าใบให้พอดีจอ (scale เดียวทั้งก้อน) — เรียกตอนเปิดฉาก และทุกครั้งที่ขนาดจอเปลี่ยน/หมุนจอ
 function pmFit(){
