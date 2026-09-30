@@ -4486,7 +4486,14 @@ const PM_LOCKED_POS={
  buffalo_box:{dx:0,dy:0,sc:1},
  buffalo_c__gump5:{x:44.8,y:2.5,h:70,s:0.92},
  buffalo_l__jo2:{x:67.5,y:3.1,h:70,s:0.84},
- buffalo_r__maya12:{x:32.1,y:-0.2,h:70,s:1.08}
+  buffalo_r__maya12:{x:32.1,y:-0.2,h:70,s:1.08}
+};                                    // ← ปิด PM_LOCKED_POS ก่อน!
+
+/* 🔒 s1pm ตำแหน่งตายตัว — ทุกเครื่องเหมือนกันเป๊ะ ไม่สน localStorage */
+const S1_LOCKED={
+ l:{left:'38%', bottom:'0%',  height:'62%'},   // โค้ช
+ c:{left:'50%', bottom:'2%',  height:'58%'},   // กลาง
+ r:{left:'76%', bottom:'2%',  height:'52%'}    // มายา
 };
 /* =========================================================
    ระบบตำแหน่งฉาก post-game — ยึด % ของเวที ใช้ได้ทุกจอ
