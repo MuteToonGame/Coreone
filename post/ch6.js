@@ -35,7 +35,7 @@
       if (typeof PM_LOCKED_POS === 'object' && PM_LOCKED_POS) {
 
         /* ---- ตัวละคร: ช่อง l (ซ้าย) ---- */
-        PM_LOCKED_POS.s6pm_l__eyejo    = { x: 40, y: 5,  h: 70, s: 1};  // โจ (ตาเขียว) ขยายใหญ่พิเศษ
+        PM_LOCKED_POS.s6pm_l__eyejo    = { x: 40, y: 5,  h: 70, s: 0.7};  // โจ (ตาเขียว) ขยายใหญ่พิเศษ
         PM_LOCKED_POS.s6pm_l__jo       = { x: 22, y: 0,  h: 70, s: 1   };  // โจ ปกติ
         PM_LOCKED_POS.s6pm_l__maya11   = { x: 22, y: 0,  h: 70, s: 1   };  // มายา ปกติ
         PM_LOCKED_POS.s6pm_l__mayasad  = { x: 22, y: 0,  h: 70, s: 1   };  // มายา เศร้า
