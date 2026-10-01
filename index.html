@@ -5858,6 +5858,10 @@ function renderCardDraft(){
 
  const stats = ['str','agi','dex','vit','luk'].map(x=>
    `<div class="dr-stat"><span>${statName(x).split(' ')[1]}</span><b>${s[x]}</b></div>`).join('');
+const stageNo = (R.endless ? 0 : (R.stage + 1));
+const artSrc = (stageNo >= 5 && stageNo <= 7) ? 'Troom.webp'
+             : (stageNo >= 8 && stageNo <= 10) ? 'Wroom.webp'
+             : 'Pick.webp';
  const extras = (R.shield ? `<div class="dr-x">🛡 ${R.shield}</div>` : '')
               + (R.retry  ? `<div class="dr-x">🔄 ${R.retry}</div>`  : '');
 
