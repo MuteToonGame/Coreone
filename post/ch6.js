@@ -4,6 +4,8 @@
    Depends on: showPostMatch, playerName, PM_LOCKED_POS (index.html)
    หมายเหตุ: inject พิกัด [s6pm] เข้า PM_LOCKED_POS เองจากไฟล์นี้
              ไม่ต้องแก้ index.html
+   ✅ ใช้ระบบพิกัดใหม่ x/y/h/s (หน่วย % ของเวที 450×700)
+      → เท่ากันทุกจอ ไม่เพี้ยนข้ามเครื่อง
    ============================================================ */
 
 (function () {
@@ -12,14 +14,42 @@
   /* ---------- 💉 ฉีดพิกัด [s6pm] เข้า PM_LOCKED_POS ของ index.html ----------
      PM_LOCKED_POS ถูกประกาศด้วย const ที่ top-level ของ classic script
      → อยู่ใน global lexical scope ที่แชร์กันทุก script บนหน้าเว็บ
-     → จากไฟล์นี้มองเห็นและแก้ property ได้เลย (ติดแค่ห้าม reassign ตัวแปร) */
+     → จากไฟล์นี้มองเห็นและแก้ property ได้เลย (ติดแค่ห้าม reassign ตัวแปร)
+
+     📐 ระบบพิกัดใหม่ (x/y/h/s) — หน่วย % ของเวที 450×700:
+        x = ตำแหน่งแนวนอน %  (0=ซ้าย, 50=กลาง, 100=ขวา)
+        y = ตำแหน่งแนวตั้ง % นับจาก "ล่าง" (0=ติดพื้น, ค่าลบ=ลอยขึ้น)
+        h = ความสูงภาพ % ของเวที (70 = ปกติ)
+        s = สเกลเสริม (1=ปกติ, 1.2=ใหญ่ขึ้น 20%)
+
+     📐 กล่องข้อความ (box) — ยังใช้ dx/dy/sc (หน่วย px ของผ้าใบ 450×860)
+
+     🎯 วิธีปรับค่าจริง:
+        1. เปิด PM_EDIT_FORCE=true ใน index.html
+        2. เล่นด่าน 6 → เข้าฉาก post6 → ลาก/ย่อขยายให้สวย
+        3. กด "📤 ส่งออกทุกฉาก" → "📋 คัดลอก"
+        4. วางทับค่าด้านล่างนี้
+        5. ปิด PM_EDIT_FORCE=false */
   (function patchS6pmCoords(){
     try {
       if (typeof PM_LOCKED_POS === 'object' && PM_LOCKED_POS) {
-        PM_LOCKED_POS.s6pm_l__eyejo    = { dx: 84.16007232666016, dy: -247.11105346679688, sc: 2.2 };
-        PM_LOCKED_POS.s6pm_r__gumpzen2 = { dx: 12.018020629882812, dy: -6.4715576171875,  sc: 1   };
-        PM_LOCKED_POS.s6pm_c           = { dx: 0,                   dy: 0,                   sc: 1   };
-        PM_LOCKED_POS.s6pm_box         = { dx: 0,                   dy: 0,                   sc: 1   };
+
+        /* ---- ตัวละคร: ช่อง l (ซ้าย) ---- */
+        PM_LOCKED_POS.s6pm_l__eyejo    = { x: 40, y: 5,  h: 70, s: 1.6 };  // โจ (ตาเขียว) ขยายใหญ่พิเศษ
+        PM_LOCKED_POS.s6pm_l__jo       = { x: 22, y: 0,  h: 70, s: 1   };  // โจ ปกติ
+        PM_LOCKED_POS.s6pm_l__maya11   = { x: 22, y: 0,  h: 70, s: 1   };  // มายา ปกติ
+        PM_LOCKED_POS.s6pm_l__mayasad  = { x: 22, y: 0,  h: 70, s: 1   };  // มายา เศร้า
+
+        /* ---- ตัวละคร: ช่อง r (ขวา) ---- */
+        PM_LOCKED_POS.s6pm_r__gumpzen2 = { x: 80, y: 0,  h: 70, s: 1   };  // กัมป์ หอบ
+        PM_LOCKED_POS.s6pm_r__jo       = { x: 80, y: 0,  h: 70, s: 1   };  // โจ (เผื่อใช้ช่อง r)
+        PM_LOCKED_POS.s6pm_r__mayasad  = { x: 80, y: 0,  h: 70, s: 1   };  // มายา เศร้า (เผื่อใช้ช่อง r)
+
+        /* ---- ตัวละคร: ช่อง c (กลาง) — ปกติไม่ค่อยได้ใช้ ---- */
+        PM_LOCKED_POS.s6pm_c           = { x: 50, y: 0,  h: 70, s: 1   };
+
+        /* ---- กล่องข้อความ ---- */
+        PM_LOCKED_POS.s6pm_box         = { dx: 0, dy: 0, sc: 1 };
       }
     } catch (e) { /* ถ้า PM_LOCKED_POS ยังไม่โหลด (โหลดไฟล์ช้า) ก็ข้ามไป — ค่า default จะถูกใช้ */ }
   })();
