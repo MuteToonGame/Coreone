@@ -6998,7 +6998,7 @@ function s10FightBubbles(){
  if(R.idx===1&&R.phUsed){R.s10Seen[k]=true;
   R.bubTalk=true;R.busy=true;scrBattle();
   bubbleSay([
-   {who:'mayaw',text:'กัมป์! ข้อเท้าบิดแรงขนาดนั้น HP เหลือแค่ 1 แล้วนะคะ... อย่าฝืนเกินตัวนะคะ!'},
+   {who:'mayaw',text:'กัมป์! ข้อเท้าบิดแรงขนาดนั้น HP เหลือแค่ 15% แล้วนะคะ... อย่าฝืนเกินตัวนะคะ!'},
    {who:'bra',text:'นั่นมันท่าอะไรน่ะ!? ไม่มีในเทปสักม้วน... ทำได้ยังไง!?'}
   ],()=>{R.bubTalk=false;R.busy=false;scrBattle()});return}
  if(R.idx===3){R.s10Seen[k]=true;
@@ -7048,7 +7048,7 @@ function phantomGo(sub){R.phFx=true;winClash('HLS','PHANTOM SPIN!',sub,'f-luck')
 function phantomIntroCard(){
  const r=R;
  const ov=document.createElement('div');ov.className='phc-ov';
- ov.innerHTML=`<div class="phc-bg"></div><div class="phc-rays"></div><div class="phc-slash s1"></div><div class="phc-slash s2"></div><div class="phc-art"><img src="Phantom.webp" alt="" draggable="false" onerror="this.parentElement.classList.add('noimg');this.remove()"><div class="phc-ball">${ballSVG()}</div></div><div class="phc-tag">⚡ ปลดล็อกท่าไม้ตาย ⚡</div><div class="phc-name">PHANTOM SPIN</div><div class="phc-desc">หลอกด้วยท็อปสปิน — ลูกพุ่งขึ้นแค่พ้นหัว แต่หมุนแรงจนค้างกลางอากาศ กองหลังแหงนมองรอจังหวะ ก่อนลูกดิ่งลงพื้นแบบจับทางไม่ได้ แล้วเก็บลูกวิ่งผ่านเข้าไป<br>แลกด้วย <b>แรงบิดข้อเท้าสูงมาก</b> — <b>HP เหลือ 1</b></div> <button class="phc-go">🌀 ใช้ PHANTOM SPIN</button><div class="phc-bar t"></div><div class="phc-bar b"></div><div class="phc-flash"></div>`;
+ ov.innerHTML=`<div class="phc-bg"></div><div class="phc-rays"></div><div class="phc-slash s1"></div><div class="phc-slash s2"></div><div class="phc-art"><img src="Phantom.webp" alt="" draggable="false" onerror="this.parentElement.classList.add('noimg');this.remove()"><div class="phc-ball">${ballSVG()}</div></div><div class="phc-tag">⚡ ปลดล็อกท่าไม้ตาย ⚡</div><div class="phc-name">PHANTOM SPIN</div><div class="phc-desc">หลอกด้วยท็อปสปิน — ลูกพุ่งขึ้นแค่พ้นหัว แต่หมุนแรงจนค้างกลางอากาศ กองหลังแหงนมองรอจังหวะ ก่อนลูกดิ่งลงพื้นแบบจับทางไม่ได้ แล้วเก็บลูกวิ่งผ่านเข้าไป<br>แลกด้วย <b>แรงบิดข้อเท้าสูงมาก</b> — <b>HP เหลือ 15%</b></div> <button class="phc-go">🌀 ใช้ PHANTOM SPIN</button><div class="phc-bar t"></div><div class="phc-bar b"></div><div class="phc-flash"></div>`;
  ov.querySelector('.phc-go').addEventListener('click',()=>{ov.remove();if(R===r&&R&&!R.over)phantomCut()});
  document.body.appendChild(ov);
  navigator.vibrate&&navigator.vibrate([0,20,30,70])}
@@ -7058,8 +7058,8 @@ function phantomCut(){
  R.phReady=false;R.phSeal=0;R.busy=true;R.phUsed=true;
  S.story.phantomUnlocked=true;save();
  phantomFx(()=>{if(R!==r||R.over)return;
-  burnKcal('HLS');R.hp=1;
-  log('🌀 PHANTOM SPIN! ปลดล็อกท่าไม้ตาย — บิดข้อเท้าสุดแรง บอลลอยฟ้า กองหลังมองตามไม่ทัน (HP เหลือ 1)','gold');
+  burnKcal('HLS');R.hp = Math.max(1, Math.round(maxHp() * 0.15));
+log('🌀 PHANTOM SPIN! ปลดล็อกท่าไม้ตาย — บิดข้อเท้าสุดแรง บอลลอยฟ้า กองหลังมองตามไม่ทัน (HP เหลือ 15%)','gold');
   R.busy=false;phantomGo('ไม่มีในเทป!')})}
 function s10WinBubble(){
  if(!isStage10Fight())return;
@@ -8797,11 +8797,11 @@ function heelSpinBtn(e){
  if(R.phReady)return `<button data-k="PHN" class="btn-r act ph-btn" onclick="phantomCut()"><span class="ab-h"><span class="ab-ic">🌀</span><b class="ab-n">PHANTOM SPIN</b></span><span class="small ab-d">...</span></button>`;
  if(isS9Boss()||isS11Final())return'';
  if(!heelUnlocked())return'';
- const s=eff(),canHp=R.hp>10,strongerFoe=e.str>s.str;
+ const s=eff(),canHp=R.hp > Math.round(maxHp() * 0.15),strongerFoe=e.str>s.str;
  const dis=!canHp||!strongerFoe;
  const why=!canHp?'HP ไม่พอ':!strongerFoe?'ใช้ได้เฉพาะคู่แข่ง Str สูงกว่าเรา':'';
  return `<button data-k="PHN" class="btn-r act" ${dis?'disabled':''} onclick="useOneOneThunder()"><span class="ab-h"><span class="ab-ic">🌀</span><b class="ab-n">PHANTOM SPIN</b></span>
-<span class="small ab-d">บาดเจ็บ: HP เหลือ 1 · ผ่านคู่แข่งทันที${why?' · '+why:''}</span></button>`}
+<span class="small ab-d">บาดเจ็บ: HP เหลือ 15% · ผ่านคู่แข่งทันที${why?' · '+why:''}</span></button>`}
 function useOneOneThunder(){
  if(!guard()||R.phUsed)return;if(isS9Boss()||isS11Final())return;const s=eff(),e=curEnemy();
  if(R.hp<=10||e.str<=s.str)return;
