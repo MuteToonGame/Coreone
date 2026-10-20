@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ตู้คีบกัมป์ (1 สิทธิ์)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@500;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+body{
+  font-family:"Kanit",sans-serif;background:#0a0614;color:#fff;
+  height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+
+/* ── โครงสร้าง Modal จากในเกม ── */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+.mbox{background:linear-gradient(165deg,#241338,#140a22 60%,#0a0614);border:1.5px solid rgba(255,255,255,.22);border-radius:18px 18px 18px 4px;padding:18px;max-width:340px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.65)}
+
+/* ── กล่องตู้คีบ ── */
+.s6g-box{max-width:340px;padding:14px;border-radius:20px 20px 20px 6px}
+.s6g-mach{
+  position:relative;width:100%;aspect-ratio:768/1237;border-radius:14px;overflow:hidden;
+  background-image:url('Keep.webp');background-size:cover;background-position:center;
+  background-color:#0a0614;
+  border: 2px solid #3df2ff; box-shadow: 0 0 20px rgba(61,242,255,0.4) inset;
+}
+.s6g-cab{position:absolute;left:19.5%;top:22%;width:62%;height:51%;overflow:hidden;border-radius:4px}
+.s6g-icons{position:absolute;inset:0}
+.s6g-ic{position:absolute;font-size:20px;opacity:.85;animation:s6gFloat 2.6s ease-in-out infinite;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+@keyframes s6gFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.s6g-cow{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);z-index:2;animation:s6gPulse 1.8s ease-in-out infinite;transition:top .45s cubic-bezier(.4,0,.2,1),opacity .35s ease}
+.s6g-cow img{width:76px;height:auto;display:block}
+.s6g-cow.s6g-grabbed{top:14%;opacity:1;animation:none}  
+.s6g-cow.s6g-respawn{transition:none;top:52%;opacity:0} 
+@keyframes s6gPulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,213,74,.4))}50%{filter:drop-shadow(0 0 20px rgba(255,213,74,.85))}}
+.s6g-claw{position:absolute;left:50%;top:6px;transform:translate(-50%,0);font-size:30px;z-index:3;transition:top .45s cubic-bezier(.4,0,.2,1)}
+.s6g-claw.drop{top:48%}
+
+/* ── แถบปุ่มกดด้านล่าง ── */
+.s6g-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+.s6g-cost{font-weight:800;color:#ffd54a;font-size:14px}
+.btn-y{font-family:inherit;cursor:pointer;border:none;border-radius:9px;padding:10px 20px;font-size:16px;font-weight:900;background:linear-gradient(160deg,#ffe58a,#ffd54a 55%,#e0a600);color:#231900;transition:.15s;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.btn-y:active{transform:translateY(2px);box-shadow:none}
+.btn-y:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1);box-shadow:none}
+
+/* ── ป๊อปอัปแสดงรางวัล ── */
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:100;animation:fadeIn .3s ease}
+.popup.show{display:flex}
+.ticket{background:#fff;color:#000;padding:24px 20px;border-radius:15px;text-align:center;width:80%;max-width:300px;border:4px dashed #ff3d5c;animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
+.ticket h2{font-size:24px;color:#ff3d5c;margin-bottom:10px}
+.ticket .reward-icon{font-size:70px;margin:10px 0;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.2))}
+.ticket .reward-name{font-size:24px;font-weight:900;color:#231900;line-height:1.3}
+.ticket button{margin-top:20px;padding:12px;background:#ffd54a;border:none;border-radius:20px;font-family:inherit;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 4px 0 #b38f00;width:100%}
+.ticket button:active{transform:translateY(3px);box-shadow:0 1px 0 #b38f00}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- หน้าจอตู้คีบ -->
+<div class="modal">
+  <div class="mbox s6g-box">
+    <div class="s6g-mach">
+      <div class="s6g-cab">
+        <div class="s6g-icons" id="s6gIcons"></div>
+        <!-- ใช้รูปกัมป์จากในเกม -->
+        <div class="s6g-cow" id="s6gCow">
+          <img src="Buff1.webp" alt="" onerror="this.src='Buff.webp'">
+        </div>
+        <div class="s6g-claw" id="s6gClaw">🪝</div>
+      </div>
+    </div>
+    
+    <div class="s6g-bar">
+      <span class="s6g-cost" id="s6gCost">🎁 สิทธิ์คีบ: 1 ครั้ง</span>
+      <button class="btn-y" id="s6gPullBtn" onclick="s6gPull()">🕹 คีบเลย!</button>
+    </div>
+  </div>
+</div>
+
+<!-- ป๊อปอัปแสดงตั๋วรางวัล -->
+<div class="popup" id="popup">
+  <div class="ticket">
+    <h2>🎉 คีบสำเร็จ! 🎉</h2>
+    <div class="reward-icon" id="pop-icon">🥤</div>
+    <div class="reward-name" id="pop-name">น้ำกระป๋อง 1 ขวด</div>
+    <button onclick="closePopup()">รับรางวัล</button>
+  </div>
+</div>
+
+<script>
+// ══════════ ตั้งค่ารางวัล ══════════
+const REWARDS = [
+  { icon: '🥤', name: 'น้ำกระป๋อง 1 ขวด', chance: 30 },
+  { icon: '🍟', name: 'ขนม 1 ห่อ', chance: 30 },
+  { icon: '🍜', name: 'มาม่า 1 ห่อ', chance: 30 },
+  { icon: '🌬️', name: 'อดรางวัล รอบนี้ได้ลม', chance: 5 },
+  { icon: '💰', name: 'แค่แรง 100฿', chance: 5 }
+];
+
+// ══════════ ระบบล็อคสิทธิ์ 1 ครั้ง ══════════
+// เช็คจากความจำของเบราว์เซอร์ว่าเคยเล่นหรือยัง
+let hasPlayed = localStorage.getItem('kump_claw_played') === 'true';
+
+// สุ่มไอคอนพื้นหลังตู้ (เหมือนในเกม)
+function s6gIcons(){
+  const emojis = ['🎁','📦','🧻','⭐','🍬','🎈','🐣','🎀','💎','🔔'];
+  const el = document.getElementById('s6gIcons');
+  let html = '';
+  for(let i=0; i<20; i++){
+    html += `<span class="s6g-ic" style="left:${6+((i*37)%88)}%;top:${8+((i*53)%78)}%;animation-delay:${(i%9)*.15}s">${emojis[Math.floor(Math.random()*emojis.length)]}</span>`;
+  }
+  el.innerHTML = html;
+}
+
+// ฟังก์ชันกดคีบ
+function s6gPull(){
+  if(hasPlayed) return;
+  
+  // บันทึกว่าเล่นไปแล้ว
+  hasPlayed = true;
+  localStorage.setItem('kump_claw_played', 'true');
+  
+  const btn = document.getElementById('s6gPullBtn');
+  const claw = document.getElementById('s6gClaw');
+  const cow = document.getElementById('s6gCow');
+  
+  // ปิดปุ่มและเปลี่ยนข้อความ
+  btn.disabled = true;
+  document.getElementById('s6gCost').textContent = '❌ ใช้สิทธิ์หมดแล้ว';
+  
+  // 1. ตะขอกล่องลง
+  claw.classList.add('drop');
+  
+  // 2. รอ 450ms แล้วเริ่มสุ่มผลลัพธ์
+  setTimeout(() => {
+    claw.classList.remove('drop');
+    
+    // สุ่มรางวัลตาม % ที่ตั้งไว้
+    let roll = Math.random() * 100;
+    let currentChance = 0;
+    let result = REWARDS[REWARDS.length - 1];
+    
+    for(let r of REWARDS){
+      currentChance += r.chance;
+      if(roll <= currentChance){
+        result = r;
+        break;
+      }
+    }
+    
+    // ถ้าสุ่มได้รางวัลจริงๆ (ไม่ใช่สายลม) ให้ตัวกัมป์ลอยขึ้นไป
+    if(result.name !== 'อดรางวัล รอบนี้ได้ลม') {
+      cow.classList.add('s6g-grabbed');
+      
+      // รอให้แอนิเมชันลอยขึ้นเสร็จ แล้วโชว์ป๊อปอัป
+      setTimeout(() => {
+        showPopup(result.icon, result.name);
+      }, 1000);
+    } else {
+      // ถ้าพลาด
+      setTimeout(() => {
+        showPopup(result.icon, result.name);
+      }, 600);
+    }
+  }, 450);
+}
+
+function showPopup(icon, name) {
+  document.getElementById('pop-icon').textContent = icon;
+  document.getElementById('pop-name').textContent = name;
+  document.getElementById('popup').classList.add('show');
+}
+
+function closePopup() {
+  document.getElementById('popup').classList.remove('show');
+}
+
+// เริ่มระบบทันทีที่โหลดหน้า
+s6gIcons();
+
+// ถ้าเคยเล่นไปแล้ว (เปิดใหม่) ให้ปิดปุ่มทันที
+if(hasPlayed) {
+  document.getElementById('s6gPullBtn').disabled = true;
+  document.getElementById('s6gCost').textContent = '❌ ใช้สิทธิ์หมดแล้ว';
+}
+</script>
+</body>
+</html>
