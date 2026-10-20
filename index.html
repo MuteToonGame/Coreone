@@ -7058,8 +7058,8 @@ function phantomCut(){
  R.phReady=false;R.phSeal=0;R.busy=true;R.phUsed=true;
  S.story.phantomUnlocked=true;save();
  phantomFx(()=>{if(R!==r||R.over)return;
-  burnKcal('HLS');R.hp = Math.max(1, Math.round(maxHp() * 0.15));
-log('🌀 PHANTOM SPIN! ปลดล็อกท่าไม้ตาย — บิดข้อเท้าสุดแรง บอลลอยฟ้า กองหลังมองตามไม่ทัน (HP เหลือ 15%)','gold');
+  burnKcal('HLS');R.hp=Math.min(R.hp,phHp());
+  log('🌀 PHANTOM SPIN! ปลดล็อกท่าไม้ตาย — บิดข้อเท้าสุดแรง บอลลอยฟ้า กองหลังมองตามไม่ทัน (HP เหลือ 15%)','gold');
   R.busy=false;phantomGo('ไม่มีในเทป!')})}
 function s10WinBubble(){
  if(!isStage10Fight())return;
@@ -7796,10 +7796,10 @@ function pmTap(){
  pmRender()}
 
 
-const S2_PRE_EDIT=false;
-const S3_PRE_EDIT=false;
-const S4_PRE_EDIT=false;
-const S5_PRE_EDIT=false;
+const S2_PRE_EDIT=true;
+const S3_PRE_EDIT=true;
+const S4_PRE_EDIT=true;
+const S5_PRE_EDIT=true;
 const S2_PRE_POS={coach:{x:0.9,y:26.1},gump:{x:3.1,y:55.8},jo:{x:36.9,y:62.6},maya:{x:36,y:29}};
 const S2_PRE=[
  {k:'coach',who:'โค้ชวิค',text:'แนวรับญี่ปุ่นไม่เหมือนบอลท้องถิ่น... วินัยพวกมันระดับโลก ถ้าคิดจะเล่นแบบเดิม โดนตัดบอลตายแน่'},
@@ -8797,16 +8797,18 @@ function heelSpinBtn(e){
  if(R.phReady)return `<button data-k="PHN" class="btn-r act ph-btn" onclick="phantomCut()"><span class="ab-h"><span class="ab-ic">🌀</span><b class="ab-n">PHANTOM SPIN</b></span><span class="small ab-d">...</span></button>`;
  if(isS9Boss()||isS11Final())return'';
  if(!heelUnlocked())return'';
- const s=eff(),canHp=R.hp > Math.round(maxHp() * 0.15),strongerFoe=e.str>s.str;
+ const s=eff(),canHp=R.hp>phHp(),strongerFoe=e.str>s.str;
  const dis=!canHp||!strongerFoe;
  const why=!canHp?'HP ไม่พอ':!strongerFoe?'ใช้ได้เฉพาะคู่แข่ง Str สูงกว่าเรา':'';
  return `<button data-k="PHN" class="btn-r act" ${dis?'disabled':''} onclick="useOneOneThunder()"><span class="ab-h"><span class="ab-ic">🌀</span><b class="ab-n">PHANTOM SPIN</b></span>
 <span class="small ab-d">บาดเจ็บ: HP เหลือ 15% · ผ่านคู่แข่งทันที${why?' · '+why:''}</span></button>`}
+// Phantom Spin: HP หลังใช้ท่า = 15% ของ HP สูงสุด (ไม่เพิ่มให้ถ้าต่ำกว่านั้นอยู่แล้ว)
+const phHp=()=>Math.max(1,Math.round(maxHp()*.15));
 function useOneOneThunder(){
  if(!guard()||R.phUsed)return;if(isS9Boss()||isS11Final())return;const s=eff(),e=curEnemy();
- if(R.hp<=10||e.str<=s.str)return;
+ if(R.hp<=phHp()||e.str<=s.str)return;
  burnKcal('HLS');
- R.hp=1;log('🌀 PHANTOM SPIN! บอลลอยฟ้าหมุนตก กองหลังมองตามไม่ทัน! (HP เหลือ 1)','gold');
+ R.hp=Math.min(R.hp,phHp());log('🌀 PHANTOM SPIN! บอลลอยฟ้าหมุนตก กองหลังมองตามไม่ทัน! (HP เหลือ 15%)','gold');
 R.busy=true;phantomFx(()=>{if(!R||R.over)return;R.busy=false;phantomGo('ลูกหมุนลอยฟ้า!')})}
 
 const oneOneJoOk=e=>{if(!S.story||!S.story.oneoneUnlocked)return false;if(isS9Boss()||isS11Fight())return false;return !!e&&!e.gk&&!e.leJuge};
@@ -9613,27 +9615,19 @@ function tallyQuests(isWin){
  return {lines, exp, mp};
 }
 function showWinImage(next){
-  // 1. แก้เป็นตัว W ใหญ่ให้ตรงกับใน GitHub
-  const imgs=['Win1.webp','Win2.webp','Win3.webp','Win4.webp','Win5.webp','Win6.webp'];
-  const pick=imgs[Math.floor(Math.random()*imgs.length)];
-  window.__winPick=pick;
-  
-  const old=document.querySelector('.winimg-ov');if(old)old.remove();
-  window.__winImgNext=next;
-  
-  // 2. เพิ่มพื้นหลังสีสำรองป้องกันจอดำ และถ้าภาพแตกให้โชว์คำว่า WIN แทน
-  $('app').insertAdjacentHTML('beforeend',
-   `<div class="winimg-ov" style="position:fixed;inset:0;z-index:9999;background:rgba(5,10,20,0.95);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .25s ease" onclick="closeWinImage()">
-     <img src="${pick}" style="max-width:92%;max-height:88vh;object-fit:contain;filter:drop-shadow(0 10px 26px rgba(0,0,0,.6))" 
-          onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<h2 style=\'color:#ffd54a;font-size:40px;text-align:center;font-family:Kanit,sans-serif;text-shadow:0 0 20px #ffd54a;\'>🎉 GOAL! 🎉</h2>')">
-     <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;color:#fff;opacity:.75;font-size:13px">แตะที่หน้าจอเพื่อไปต่อ</div>
-    </div>`);
-    
-  requestAnimationFrame(()=>{const ov=document.querySelector('.winimg-ov');if(ov)ov.style.opacity='1'});
-  clearTimeout(window.__winImgTimer);
-  
-  // 3. บังคับให้ข้ามไปหน้าสรุปใน 3 วินาที (ถ้าคนเล่นไม่ยอมกด)
-  window.__winImgTimer=setTimeout(closeWinImage,3000); 
+ const imgs=['win1.webp','win2.webp','win3.webp','win4.webp','win5.webp','win6.webp'];
+ const pick=imgs[Math.floor(Math.random()*imgs.length)];
+ window.__winPick=pick;
+ const old=document.querySelector('.winimg-ov');if(old)old.remove();
+ window.__winImgNext=next;
+ $('app').insertAdjacentHTML('beforeend',
+  `<div class="winimg-ov" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .25s ease" onclick="closeWinImage()">
+    <img src="${pick}" style="max-width:92%;max-height:88vh;object-fit:contain;filter:drop-shadow(0 10px 26px rgba(0,0,0,.6))" onerror="this.parentElement.remove();const n=window.__winImgNext;window.__winImgNext=null;clearTimeout(window.__winImgTimer);if(n)n()">
+    <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;color:#fff;opacity:.75;font-size:13px">แตะที่ภาพเพื่อไปต่อ</div>
+   </div>`);
+ requestAnimationFrame(()=>{const ov=document.querySelector('.winimg-ov');if(ov)ov.style.opacity='1'});
+ clearTimeout(window.__winImgTimer);
+ window.__winImgTimer=setTimeout(closeWinImage,2200);
 }
 function closeWinImage(){
  clearTimeout(window.__winImgTimer);
@@ -9844,7 +9838,7 @@ if(farmBlocked()){earned=0} else {S.mp=(S.mp||0)+mpEarned;debtPay(mpEarned)}
 S.cafPending=true;save();
  const tacD=tacRankUpData();
  const last=st===MAIN_STAGES-1,nxt=st+1,hasNext=st<MAIN_STAGES-1;
- const winBg=window.__winPick||['Win1.webp','Win2.webp','Win3.webp','Win4.webp','Win5.webp','Win6.webp'][Math.floor(Math.random()*6)];
+ const winBg=window.__winPick||['win1.webp','win2.webp','win3.webp','win4.webp','win5.webp','win6.webp'][Math.floor(Math.random()*6)];
  if(last&&!S.story.ending){S.story.ending=true;save()}
  if(st===2&&!R.endless&&!S.story.dropGuide){const tit=pickTutorItem();if(tit){R.giftQueue=R.giftQueue||[];R.giftQueue.unshift(tit)}R.dropTutor=!!tit;S.story.dropGuide=true;save()}
  showGifts(()=>(tacPopSoon(tacD),lvAfter(render(`<div class="win-bg" style="background-image:url('${winBg}')"></div>
@@ -13798,6 +13792,421 @@ setInterval(() => {
   }
  }
 }, 2000);
+
+</script>
+<script>
+/* ===== STRIKER FOOTBALL — SOUND SYSTEM (procedural WebAudio, ไม่ต้องใช้ไฟล์เสียง) =====
+   SFX.play('ชื่อเสียง') · SFX.mode('menu|battle|boss|final|cafe|story|null') · SFX.cfg.sfx / SFX.cfg.bgm
+   ปุ่มเปิด/ปิด: มุมขวาบน (🔊 เอฟเฟกต์ · 🎵 เพลง) หรือกด M = ปิด/เปิดทั้งหมด */
+(function () {
+  'use strict';
+  if (window.SFX) return;
+  var KEY = 'striker_snd_v1';
+  var cfg = { sfx: true, bgm: true };
+  try { var j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { cfg.sfx = j.sfx !== false; cfg.bgm = j.bgm !== false; } } catch (e) {}
+  var saveCfg = function () { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {} };
+  var AC0 = window.AudioContext || window.webkitAudioContext;
+  var ctx = null, master, sBus, mBus, nbuf, unlocked = false;
+  var legacy = [];
+
+  /* ---------- สะพานให้เสียงเก่าในเกม (ACTX / AC / new Audio) เคารพปุ่มปิดเสียงด้วย ---------- */
+  try {
+    if (AC0 && window.BaseAudioContext) {
+      var dd = Object.getOwnPropertyDescriptor(BaseAudioContext.prototype, 'destination');
+      var AC1 = class extends AC0 {
+        constructor() {
+          super(...arguments);
+          try {
+            var real = dd.get.call(this), g = AC0.prototype.createGain.call(this);
+            g.gain.value = cfg.sfx ? 1 : 0; g.connect(real);
+            Object.defineProperty(this, 'destination', { get: function () { return g; } });
+            legacy.push(g);
+          } catch (e) {}
+        }
+      };
+      window.AudioContext = AC1; window.webkitAudioContext = AC1;
+    }
+    var _pl = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () { if (!cfg.sfx && !this.isConnected) this.muted = true; return _pl.apply(this, arguments); };
+  } catch (e) {}
+
+  /* ---------- core ---------- */
+  function init() {
+    if (ctx) return ctx; if (!AC0) return null;
+    try { ctx = new AC0(); } catch (e) { return null; }
+    var comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.knee.value = 12; comp.ratio.value = 6; comp.attack.value = .003; comp.release.value = .2;
+    master = ctx.createGain(); master.gain.value = .9;
+    sBus = ctx.createGain(); mBus = ctx.createGain();
+    sBus.gain.value = cfg.sfx ? 1 : 0; mBus.gain.value = cfg.bgm ? .32 : 0;
+    sBus.connect(master); mBus.connect(master); master.connect(comp); comp.connect(ctx.destination);
+    nbuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    var d = nbuf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return ctx;
+  }
+  function ready() {
+    if (!unlocked) return null;
+    var c = init(); if (!c) return null;
+    if (c.state === 'suspended') c.resume().catch(function () {});
+    return c;
+  }
+  var mf = function (m) { return 440 * Math.pow(2, (m - 69) / 12); };
+  var rnd = function (a, b) { return a + Math.random() * (b - a); };
+
+  function T(o) {
+    var c = ready(); if (!c) return;
+    var t0 = o.at != null ? o.at : c.currentTime + (o.t || 0), d = o.d || .1, v = o.v == null ? .25 : o.v, a = o.a || .004;
+    var os = c.createOscillator(), g = c.createGain();
+    os.type = o.type || 'sine'; os.frequency.setValueAtTime(o.f, t0);
+    if (o.f2) os.frequency.exponentialRampToValueAtTime(Math.max(1, o.f2), t0 + d);
+    g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(Math.max(.0002, v), t0 + a);
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+    os.connect(g); var out = g;
+    if (o.lp) { var f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp; g.connect(f); out = f; }
+    out.connect(o.bus || sBus); os.start(t0); os.stop(t0 + d + .05);
+  }
+  function N(o) {
+    var c = ready(); if (!c) return;
+    var t0 = o.at != null ? o.at : c.currentTime + (o.t || 0), d = o.d || .1, v = o.v == null ? .2 : o.v, a = o.a || .003;
+    var s = c.createBufferSource(); s.buffer = nbuf; s.loop = true;
+    var f = c.createBiquadFilter(); f.type = o.type || 'bandpass';
+    f.frequency.setValueAtTime(o.f || 1500, t0); if (o.f2) f.frequency.exponentialRampToValueAtTime(Math.max(20, o.f2), t0 + d);
+    f.Q.value = o.q || 1;
+    var g = c.createGain(); g.gain.setValueAtTime(.0001, t0);
+    g.gain.linearRampToValueAtTime(v, t0 + a); g.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+    s.connect(f); f.connect(g); g.connect(o.bus || sBus); s.start(t0, Math.random() * 1.5); s.stop(t0 + d + .05);
+  }
+  function arp(notes, gap, type, v, d, t0) { notes.forEach(function (m, i) { T({ f: mf(m), d: d || .16, t: (t0 || 0) + i * gap, type: type || 'triangle', v: v || .13 }); }); }
+
+  /* ---------- คลังเสียง ---------- */
+  var LB = {};
+  // UI
+  LB.click = function () { T({ f: 1000, f2: 650, d: .05, v: .1, type: 'square', lp: 3200 }); };
+  LB.tap = function () { T({ f: 620, f2: 420, d: .045, v: .09, type: 'triangle' }); };
+  LB.deny = function () { T({ f: 220, f2: 150, d: .16, v: .12, type: 'sawtooth', lp: 1200 }); T({ f: 200, f2: 130, d: .16, v: .1, type: 'sawtooth', lp: 1200, t: .13 }); };
+  LB.open = function () { N({ f: 400, f2: 2600, d: .2, v: .09, q: 2 }); T({ f: 520, f2: 800, d: .13, v: .08, type: 'triangle' }); };
+  LB.confirm = function () { arp([79, 84], .07, 'square', .08, .12); };
+  LB.pop = function () { T({ f: 700, f2: 1150, d: .08, v: .13 }); };
+  LB.blip = function () { T({ f: rnd(330, 520), d: .04, v: .06, type: 'square', lp: 2400 }); };
+  LB.bubble = function () { T({ f: 480, f2: 900, d: .08, v: .1, type: 'sine' }); };
+  LB.toast = function () { arp([88, 91], .06, 'sine', .11, .12); };
+  LB.buff = function () { arp([84, 88, 91], .05, 'triangle', .1, .12); N({ f: 6000, d: .08, v: .03, type: 'highpass' }); };
+  LB.coin = function () { T({ f: mf(95), d: .1, v: .14, type: 'square', lp: 5000 }); T({ f: mf(100), d: .28, v: .14, type: 'square', lp: 5000, t: .08 }); N({ f: 7000, d: .06, v: .04, type: 'highpass' }); };
+  LB.gift = function () { arp([72, 76, 79, 84, 88], .07, 'triangle', .13, .22); N({ f: 7000, d: .4, v: .035, type: 'highpass', t: .2 }); };
+  LB.quest = function () { arp([72, 79, 84, 88, 91], .08, 'square', .09, .2); };
+  LB.cardDeal = function () { for (var i = 0; i < 3; i++) N({ f: 3500, f2: 6500, d: .07, v: .12, type: 'highpass', t: i * .09 }); };
+  LB.cardPick = function () { T({ f: 660, f2: 990, d: .08, v: .1, type: 'square', lp: 3000 }); T({ f: 1320, d: .12, v: .08, type: 'triangle', t: .05 }); };
+  LB.tacup = function () { arp([67, 72, 76, 79, 84], .07, 'triangle', .13, .2); };
+  LB.event = function () { arp([64, 67, 71, 76], .12, 'sine', .13, .45); N({ f: 300, f2: 1500, d: .5, v: .05, q: 3 }); };
+  LB.stamp = function () { T({ f: 140, f2: 55, d: .22, v: .45 }); N({ f: 1200, d: .08, v: .18 }); };
+  // เสียงผู้ตัดสิน / ผู้ชม
+  LB.whistle = function () { [0, .3].forEach(function (t, i) { T({ f: 2850, d: i ? .32 : .22, v: .1, type: 'sine', t: t }); T({ f: 3150, d: i ? .32 : .22, v: .07, type: 'sine', t: t }); N({ f: 3200, d: i ? .32 : .22, v: .05, q: 6, t: t }); }); };
+  LB.gasp = function () { N({ f: 900, f2: 1800, d: .4, v: .13, q: .8, a: .15 }); };
+  LB.crowd = function (len) { len = len || 1.8; [500, 900, 1500].forEach(function (f) { N({ f: f, f2: f * 1.4, d: len, v: .1, q: .6, a: len * .3 }); }); for (var i = 0; i < 6; i++) N({ f: 2500, d: .05, v: .07, type: 'highpass', t: .1 + i * .12 + Math.random() * .08 }); };
+  LB.cheer = function () { LB.crowd(1.2); arp([84, 88, 91, 96], .06, 'triangle', .1, .2); };
+  // ท่าในการต่อสู้
+  LB.drb = function () { N({ f: 800, f2: 3500, d: .22, v: .2, q: 1.5 }); T({ f: 320, f2: 260, d: .04, v: .12, type: 'triangle', t: .1 }); T({ f: 340, f2: 280, d: .04, v: .12, type: 'triangle', t: .17 }); };
+  LB.pwd = function () { T({ f: 140, f2: 45, d: .28, v: .5 }); N({ f: 600, f2: 150, d: .22, v: .3, type: 'lowpass' }); T({ f: 120, f2: 70, d: .16, v: .1, type: 'sawtooth', lp: 700, t: .02 }); };
+  LB.zero = function () { T({ f: 220, f2: 35, d: .55, v: .55 }); N({ f: 3000, f2: 200, d: .5, v: .35, type: 'lowpass' }); T({ f: 1800, f2: 200, d: .25, v: .1, type: 'square', lp: 4000 }); };
+  LB.hls = function () { T({ f: 300, f2: 1400, d: .5, v: .14, type: 'triangle' }); N({ f: 500, f2: 4000, d: .5, v: .13, q: 4 }); };
+  LB.act = function (k) { if (k === 'DRB') LB.drb(); else if (k === 'PWD') LB.pwd(); else if (k === 'TEC') LB.zero(); else if (k === 'HLS') LB.hls(); else LB.click(); };
+  // จังหวะปะทะ (ตรงกับ spawnFX)
+  LB.smash = function () { T({ f: 110, f2: 40, d: .35, v: .55 }); N({ f: 2000, d: .35, v: .28, type: 'highpass' }); arp([60, 67], .05, 'square', .06, .12); };
+  LB.rainbow = function () { arp([72, 76, 79, 84, 88, 91, 96], .05, 'triangle', .12, .22); N({ f: 6500, d: .5, v: .04, type: 'highpass', t: .15 }); };
+  LB.spinHit = function () { N({ f: 700, f2: 3500, d: .35, v: .13, q: 5 }); arp([79, 84, 91], .07, 'triangle', .11, .2, .1); };
+  LB.dribOk = function () { arp([84, 88, 91, 96], .055, 'triangle', .12, .16); N({ f: 7000, d: .15, v: .04, type: 'highpass' }); };
+  LB.pop2 = function () { T({ f: 500, f2: 1200, d: .09, v: .16 }); N({ f: 1800, d: .06, v: .1 }); };
+  LB.tackle = function () {
+    T({ f: 110, f2: 40, d: .32, v: .55 }); N({ f: 900, f2: 200, d: .22, v: .35, type: 'lowpass' });
+    T({ f: 270, f2: 110, d: .3, v: .13, type: 'sawtooth', lp: 1300, t: .05 });
+    T({ f: mf(60), f2: mf(55), d: .35, v: .09, type: 'triangle', t: .28 });
+  };
+  LB.passDef = function () { LB.gasp(); arp([91, 96], .07, 'triangle', .1, .14, .15); };
+  LB.foeIn = function () { N({ f: 300, f2: 1800, d: .25, v: .09, q: 2 }); T({ f: 90, f2: 70, d: .18, v: .18, type: 'triangle', t: .12 }); };
+  LB.rush = function () { N({ f: 400, f2: 3000, d: .3, v: .15, q: 3 }); };
+  LB.armor = function () { T({ f: 800, f2: 400, d: .15, v: .14, type: 'square', lp: 3000 }); T({ f: 1250, f2: 600, d: .22, v: .1, type: 'square', lp: 3500, t: .02 }); N({ f: 3500, d: .12, v: .15, type: 'highpass' }); };
+  LB.save = function () { LB.armor(); T({ f: 90, f2: 50, d: .25, v: .4 }); LB.gasp(); };
+  LB.bigHit = function () { T({ f: 90, f2: 28, d: .6, v: .6 }); N({ f: 2500, f2: 150, d: .5, v: .35, type: 'lowpass' }); };
+  LB.whiteout = function () { LB.bigHit(); T({ f: 200, f2: 3000, d: .8, v: .08, type: 'sawtooth', lp: 3000 }); LB.crowd(1.4); };
+  LB.thunder = function () { N({ f: 4000, d: .22, v: .3, type: 'highpass' }); T({ f: 2200, f2: 90, d: .35, v: .14, type: 'sawtooth', lp: 3500 }); T({ f: 80, f2: 35, d: .5, v: .5, t: .06 }); };
+  LB.phantom = function () { T({ f: 300, f2: 1800, d: .8, v: .13, type: 'sine' }); N({ f: 600, f2: 5000, d: .8, v: .08, q: 3 }); T({ f: 1800, f2: 90, d: .35, v: .16, type: 'triangle', t: .95 }); T({ f: 90, f2: 30, d: .5, v: .55, t: 1.28 }); N({ f: 2000, d: .3, v: .25, type: 'highpass', t: 1.28 }); };
+  var chg = null;
+  LB.charged = function () { arp([84, 91], .05, 'square', .09, .1); N({ f: 5000, d: .15, v: .06, type: 'highpass' }); };
+  LB.chargeStart = function () {
+    var c = ready(); if (!c || !cfg.sfx || chg) return;
+    var o = c.createOscillator(), o2 = c.createOscillator(), g = c.createGain(), f = c.createBiquadFilter(), t = c.currentTime;
+    var D = (typeof ZC_MS !== 'undefined' ? ZC_MS : 850) / 1000;
+    o.type = 'sawtooth'; o2.type = 'square'; f.type = 'lowpass'; f.frequency.value = 900;
+    o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(700, t + D);
+    o2.frequency.setValueAtTime(180, t); o2.frequency.exponentialRampToValueAtTime(1400, t + D);
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.15, t + D);
+    o.connect(f); o2.connect(f); f.connect(g); g.connect(sBus); o.start(t); o2.start(t);
+    chg = { o: o, o2: o2, g: g, full: setTimeout(function () { if (chg) LB.charged(); }, D * 1000) };
+  };
+  LB.chargeStop = function () {
+    if (!chg || !ctx) return; var t = ctx.currentTime, x = chg; chg = null; clearTimeout(x.full);
+    try { x.g.gain.cancelScheduledValues(t); x.g.gain.setTargetAtTime(.0001, t, .03); x.o.stop(t + .15); x.o2.stop(t + .15); } catch (e) {}
+  };
+  // ผลลัพธ์ / ความก้าวหน้า
+  LB.streak = function (tier) { tier = tier || 1; T({ f: 70 + tier * 14, f2: 30, d: .28 + tier * .06, v: .4 + tier * .1 }); arp([72 + tier * 2, 76 + tier * 2, 79 + tier * 2], .06, 'square', .08, .14, .05); };
+  LB.heart = function (v) { v = v || 1;[0, .14].forEach(function (d, k) { T({ f: k ? 52 : 64, f2: 34, d: .16, v: (k ? .28 : .42) * v, t: d }); }); };
+  LB.levelup = function () { arp([72, 76, 79, 84, 88, 91], .07, 'square', .09, .2); arp([60, 64, 67], 0, 'triangle', .12, .7, .4); N({ f: 7000, d: .6, v: .04, type: 'highpass', t: .35 }); };
+  LB.heal = function () { arp([79, 83, 86, 91], .09, 'sine', .13, .3); };
+  LB.stat = function () { T({ f: 700, f2: 1100, d: .09, v: .12 }); };
+  LB.drop = function (epic) {
+    arp(epic ? [72, 76, 79, 84, 88, 91, 96] : [84, 88, 91, 95, 100], .055, 'triangle', .13, .22);
+    if (epic) { T({ f: 70, f2: 40, d: .5, v: .4 }); N({ f: 7000, d: .7, v: .05, type: 'highpass', t: .2 }); }
+  };
+  LB.goal = function () {
+    LB.whistle(); LB.crowd(2.6);
+    arp([72, 76, 79, 84], .12, 'square', .1, .3, .35); arp([84, 88, 91, 96], .12, 'triangle', .12, .5, .85);
+    T({ f: 60, f2: 40, d: .4, v: .4, t: .35 });
+  };
+  LB.gameover = function () { [67, 64, 60, 55].forEach(function (m, i) { T({ f: mf(m), f2: mf(m) * .97, d: .45, v: .13, type: 'triangle', t: i * .28, lp: 1500 }); }); N({ f: 300, f2: 100, d: 1.2, v: .06, type: 'lowpass' }); };
+  LB.revive = function () { arp([55, 60, 64, 67, 72, 76, 79], .06, 'triangle', .13, .3); };
+  // โรงอาหาร / ตู้คีบ
+  LB.munch = function () { for (var i = 0; i < 4; i++) { N({ f: 450, f2: 200, d: .07, v: .3, q: 2, t: i * .11 }); T({ f: 220, f2: 120, d: .05, v: .08, t: i * .11 }); } T({ f: 320, f2: 110, d: .14, v: .2, t: .55 }); };
+  LB.clawMotor = function () { N({ f: 140, f2: 200, d: .7, v: .12, q: 3 }); T({ f: 90, f2: 110, d: .7, v: .06, type: 'sawtooth', lp: 400 }); };
+  LB.clawDrop = function () { T({ f: 180, f2: 70, d: .2, v: .3, type: 'square', lp: 900 }); N({ f: 1500, d: .1, v: .2 }); };
+
+  /* ---------- เพลงพื้นหลัง (chiptune วนลูป) ---------- */
+  var CH = { M: [0, 4, 7], m: [0, 3, 7], M7: [0, 4, 7, 11], m7: [0, 3, 7, 10], '7': [0, 4, 7, 10] };
+  var TR = {
+    menu: { bpm: 100, prog: [[60, 'M'], [67, 'M'], [69, 'm'], [65, 'M']], arp: '0.1.2.1.0.1.2.3.', lead: 'triangle', ao: 0, av: .17, ad: .24, bass: 'x.......x.......', bw: 'sine', bv: .3, k: 'x.......x.......', s: '', h: '..x...x...x...x.', dv: .6 },
+    battle: { bpm: 152, prog: [[57, 'm'], [53, 'M'], [60, 'M'], [55, 'M']], arp: '0121012301210132', lead: 'square', ao: 0, av: .075, ad: .1, bass: 'x.x.x.x.x.x.x.x.', bw: 'sawtooth', bv: .14, k: 'x...x...x...x...', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', dv: 1 },
+    boss: { bpm: 168, prog: [[57, 'm'], [55, 'M'], [53, 'M'], [52, 'M']], arp: '0.2.1.3.0.2.4.3.', lead: 'sawtooth', ao: 0, av: .075, ad: .12, bass: 'xxxxxxxxxxxxxxxx', bw: 'sawtooth', bv: .1, k: 'x..xx..xx..xx.x.', s: '....x.......x..x', h: 'x.x.x.x.x.x.x.xx', dv: 1.05 },
+    final: { bpm: 132, prog: [[62, 'm'], [58, 'M'], [55, 'm'], [57, 'M']], arp: '0.0.1.0.2.0.1.0.', lead: 'sawtooth', ao: 0, av: .06, ad: .14, bass: 'x.xxx.xxx.xxx.xx', bw: 'square', bv: .1, k: 'x.......x..x....', s: '........x.......', h: '..x...x...x...x.', dv: .9 },
+    cafe: { bpm: 112, prog: [[60, 'M7'], [57, 'm7'], [62, 'm7'], [55, '7']], arp: '..0...1...2...1.', lead: 'square', ao: 0, av: .06, ad: .1, walk: true, bw: 'triangle', bv: .26, k: 'x.......x.......', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', dv: .5 },
+    story: { bpm: 72, prog: [[57, 'm'], [53, 'M'], [60, 'M'], [55, 'M']], arp: '0...1...2...1...', lead: 'sine', ao: 0, av: .12, ad: .5, pad: true, bass: 'x...............', bw: 'sine', bv: .22, k: '', s: '', h: '', dv: 0 }
+  };
+  var trk = null, want = null, holdUntil = 0;
+  function bs(tr, st, t, sd) {
+    var P = tr.T, s = st % 16, bar = Math.floor(st / 16), pc = P.prog[bar % P.prog.length], ch = CH[pc[1]], root = pc[0], bus = tr.tg;
+    if (P.pad && s === 0) ch.forEach(function (iv) { T({ at: t, f: mf(root + iv), d: sd * 15, v: .055, a: sd * 6, type: 'triangle', bus: bus, lp: 1800 }); });
+    if (P.walk) {
+      if (s % 4 === 0) { var wi = [0, 2, 1, 2][(s / 4) | 0]; T({ at: t, f: mf(root - 24 + ch[wi]), d: sd * 3.4, v: P.bv, type: P.bw, bus: bus, lp: 700 }); }
+    } else if (P.bass && P.bass.charAt(s) === 'x') {
+      T({ at: t, f: mf(root - 24 + (s % 8 === 6 ? 12 : 0)), d: sd * (P.bass === 'x.......x.......' ? 7 : 1.6), v: P.bv, type: P.bw, bus: bus, lp: 900 });
+    }
+    var a = P.arp.charAt(s);
+    if (a !== '.') { var idx = +a, m = root + 12 * P.ao + ch[idx % ch.length] + 12 * ((idx / ch.length) | 0); T({ at: t, f: mf(m + 12), d: P.ad, v: P.av, type: P.lead, bus: bus, lp: 3500 }); }
+    if (P.k && P.k.charAt(s) === 'x') T({ at: t, f: 150, f2: 45, d: .13, v: .5 * P.dv, bus: bus });
+    if (P.s && P.s.charAt(s) === 'x') { N({ at: t, f: 1800, d: .09, v: .22 * P.dv, bus: bus }); T({ at: t, f: 210, f2: 120, d: .06, v: .1 * P.dv, bus: bus }); }
+    if (P.h && P.h.charAt(s) === 'x') N({ at: t, f: 7500, d: .03, v: .07 * P.dv, type: 'highpass', bus: bus });
+  }
+  function pump(tr) {
+    var c = ctx; if (!c || c.state !== 'running') return;
+    var sd = 60 / tr.T.bpm / 4;
+    if (tr.next < c.currentTime - .2) tr.next = c.currentTime + .05;
+    while (tr.next < c.currentTime + .25) { bs(tr, tr.step, tr.next, sd); tr.next += sd; tr.step++; }
+  }
+  function startTrack(name) {
+    var c = ready(), P = TR[name]; if (!c || !P) return;
+    var tg = c.createGain(); tg.gain.setValueAtTime(.0001, c.currentTime); tg.gain.linearRampToValueAtTime(1, c.currentTime + .5); tg.connect(mBus);
+    var tr = { name: name, T: P, tg: tg, step: 0, next: c.currentTime + .08, timer: 0 };
+    tr.timer = setInterval(function () { pump(tr); }, 30); trk = tr;
+  }
+  function stopTrack(tr, fade) {
+    if (!tr) return; clearInterval(tr.timer); fade = fade || .4;
+    try { var t = ctx.currentTime; tr.tg.gain.cancelScheduledValues(t); tr.tg.gain.setValueAtTime(Math.max(.0001, tr.tg.gain.value), t); tr.tg.gain.linearRampToValueAtTime(.0001, t + fade); } catch (e) {}
+    setTimeout(function () { try { tr.tg.disconnect(); } catch (e) {} }, (fade + .2) * 1000);
+  }
+  function apply() {
+    if (!unlocked) return;
+    if (!cfg.bgm) { if (trk) { stopTrack(trk, .2); trk = null; } return; }
+    var now = performance.now(); if (now < holdUntil) { setTimeout(apply, holdUntil - now + 30); return; }
+    if (trk && trk.name === want) return;
+    if (trk) { stopTrack(trk, .5); trk = null; }
+    if (want && TR[want]) startTrack(want);
+  }
+  function mode(m) { want = m || null; apply(); }
+  function hold(ms) { holdUntil = performance.now() + ms; }
+
+  /* ---------- play / ตั้งค่า ---------- */
+  var last = {};
+  function play(name, arg) {
+    if (!cfg.sfx || !LB[name]) return;
+    var n = performance.now(), gap = ({ click: 40, blip: 70, tap: 50, stat: 150, heal: 250, coin: 80, toast: 120, open: 150, drop: 150, heart: 1200 })[name] || 60;
+    if (last[name] && n - last[name] < gap) return; last[name] = n;
+    try { LB[name](arg); } catch (e) {}
+  }
+  function applyCfg() {
+    legacy.forEach(function (g) { try { g.gain.value = cfg.sfx ? 1 : 0; } catch (e) {} });
+    if (ctx) { sBus.gain.setTargetAtTime(cfg.sfx ? 1 : 0, ctx.currentTime, .02); mBus.gain.setTargetAtTime(cfg.bgm ? .32 : 0, ctx.currentTime, .05); }
+    if (!cfg.sfx) LB.chargeStop();
+    apply(); saveCfg(); paintBtns();
+  }
+  function unlock() {
+    if (unlocked) { var c0 = ctx; if (c0 && c0.state === 'suspended') c0.resume().catch(function () {}); return; }
+    unlocked = true; var c = init(); if (c) { c.resume().catch(function () {}); }
+    apply();
+  }
+  ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(function (ev) { window.addEventListener(ev, unlock, { capture: true, passive: true }); });
+  document.addEventListener('visibilitychange', function () {
+    if (!ctx) return;
+    if (document.hidden) ctx.suspend().catch(function () {}); else if (unlocked) ctx.resume().catch(function () {});
+  });
+
+  /* ---------- ปุ่มเปิด/ปิดเสียง ---------- */
+  var wrap, bSfx, bBgm;
+  function paintBtns() {
+    if (!bSfx) return;
+    bSfx.textContent = cfg.sfx ? '🔊' : '🔇'; bBgm.textContent = cfg.bgm ? '🎵' : '🎵';
+    bSfx.style.opacity = cfg.sfx ? '.92' : '.5'; bBgm.style.opacity = cfg.bgm ? '.92' : '.5';
+    bBgm.style.textDecoration = cfg.bgm ? 'none' : 'line-through';
+    bSfx.setAttribute('aria-pressed', cfg.sfx); bBgm.setAttribute('aria-pressed', cfg.bgm);
+    bSfx.title = 'เสียงเอฟเฟกต์: ' + (cfg.sfx ? 'เปิด' : 'ปิด'); bBgm.title = 'เพลงพื้นหลัง: ' + (cfg.bgm ? 'เปิด' : 'ปิด');
+    bBgm.style.filter = cfg.bgm ? 'none' : 'grayscale(1)';
+  }
+  function buildUI() {
+    if (document.getElementById('sndWrap')) return;
+    var st = document.createElement('style');
+    st.textContent = '#sndWrap{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:6px;z-index:2147483000;display:flex;gap:5px;font-family:Kanit,sans-serif}' +
+      '#sndWrap button{all:unset;box-sizing:border-box;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;cursor:pointer;' +
+      'background:rgba(10,12,30,.72);border:1.5px solid rgba(61,242,255,.65);box-shadow:0 0 8px rgba(61,242,255,.35);-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .1s}' +
+      '#sndWrap button:active{transform:scale(.88)}';
+    document.head.appendChild(st);
+    wrap = document.createElement('div'); wrap.id = 'sndWrap';
+    bSfx = document.createElement('button'); bBgm = document.createElement('button');
+    bSfx.type = 'button'; bBgm.type = 'button';
+    bSfx.addEventListener('click', function (e) { e.stopPropagation(); cfg.sfx = !cfg.sfx; applyCfg(); if (cfg.sfx) play('confirm'); });
+    bBgm.addEventListener('click', function (e) { e.stopPropagation(); cfg.bgm = !cfg.bgm; applyCfg(); if (cfg.bgm) play('confirm'); });
+    wrap.appendChild(bSfx); wrap.appendChild(bBgm); document.body.appendChild(wrap); paintBtns();
+  }
+  buildUI();
+  window.addEventListener('keydown', function (e) {
+    if ((e.key === 'm' || e.key === 'M') && !/input|textarea/i.test((e.target && e.target.tagName) || '')) {
+      var on = !(cfg.sfx || cfg.bgm); cfg.sfx = cfg.bgm = on; applyCfg();
+    }
+  });
+
+  window.SFX = { lib: LB, play: play, mode: mode, cfg: cfg, names: Object.keys(LB), toggle: function (k) { cfg[k] = !cfg[k]; applyCfg(); } };
+
+  /* ================= ผูกเสียงเข้ากับเกม ================= */
+  var G = window;
+  function W(name, fn) {
+    var o = G[name]; if (typeof o !== 'function') return;
+    G[name] = function () { var self = this, a = arguments; try { return fn(function () { return o.apply(self, a); }, a); } catch (e) { if (e && e.__snd) throw e; return o.apply(self, a); } };
+  }
+  // เรียกเสียงก่อน/หลังฟังก์ชันเดิม โดยไม่กระทบ error ของเกม
+  function B(name, snd, arg) { var o = G[name]; if (typeof o !== 'function') return; G[name] = function () { play(snd, typeof arg === 'function' ? arg.apply(this, arguments) : arg); return o.apply(this, arguments); }; }
+  function A(name, snd, arg) { var o = G[name]; if (typeof o !== 'function') return; G[name] = function () { var r = o.apply(this, arguments); play(snd, arg); return r; }; }
+  function M(name, m) { var o = G[name]; if (typeof o !== 'function') return; G[name] = function () { try { mode(typeof m === 'function' ? m() : m); } catch (e) {} return o.apply(this, arguments); }; }
+  var inR = function () { try { return typeof R !== 'undefined' && R; } catch (e) { return null; } };
+
+  // — จอ / เพลง —
+  M('scrTitle', 'menu'); M('scrMap', 'menu'); M('scrCafeteria', 'cafe');
+  A('scrTitle', 'open');
+  ['showPostMatch', 'openCutsceneCa11', 'openCutsceneCa12', 'showS2Pre', 'showS3Pre', 'showS4Pre', 'showS5Pre', 'mayaIntroScene', 'scrIntroStory', 'scrIntroYearsAgo', 'mayaGiftScene', 'playBuffetInvite', 'showMayaCheerIntro'].forEach(function (n) { M(n, 'story'); });
+  ['scrIntroVideo', 'playIntroVideo', 'playStage1V1'].forEach(function (n) { M(n, null); });
+  var _sb = G.scrBattle, lastHb = 0;
+  if (typeof _sb === 'function') G.scrBattle = function () {
+    var r = _sb.apply(this, arguments);
+    try {
+      var X = inR();
+      if (X && !X.over) {
+        mode(X.endless ? 'battle' : (X.stage === 11 ? 'final' : (X.phase === 'gk' ? 'boss' : 'battle')));
+        if (X.hp > 0 && X.hp < maxHp() * .25 && performance.now() - lastHb > 1600) { lastHb = performance.now(); play('heart', .55); }
+      }
+    } catch (e) {}
+    return r;
+  };
+  W('startStage', function (o) { play('whistle'); return o(); });
+  B('encounter', 'foeIn');
+  B('showHalftimeBanner', 'whistle');
+  W('winStage', function (o) { hold(3600); mode(null); play('goal'); return o(); });
+  W('endRun', function (o) {
+    var X = inR(), revive = X && X.hp <= 0 && X.reviveLeft > 0, was = X && !X.over, r = o();
+    if (revive) play('revive'); else if (was && inR() && inR().over) { hold(2400); mode(null); play('gameover'); }
+    return r;
+  });
+  B('showWinImage', 'cheer');
+
+  // — ท่า / จังหวะปะทะ —
+  W('doAct', function (o, a) { var ok = false; try { ok = guard() && a[0] !== 'SKIP'; } catch (e) {} if (ok) play('act', a[0]); return o(); });
+  W('spawnFX', function (o, a) {
+    var k = a[0]; play(k === 'pwr' ? 'smash' : k === 'fail' ? 'tackle' : k === 'drift' ? 'pop2' : k === 'rbw' ? 'rainbow' : k === 'spin' ? 'spinHit' : 'dribOk'); return o();
+  });
+  W('onPass', function (o) { var X = inR(); if (X && !X.over && X.hp > 0 && X.phase !== 'gk') play('passDef'); return o(); });
+  B('zcDown', 'chargeStart'); // เริ่มชาร์จ Zero Cannon
+  W('zcStop', function (o) { play('chargeStop'); return o(); });
+  B('zcWhiteout', 'whiteout');
+  B('phantomFx', 'phantom'); B('useOneOneJo', 'thunder'); B('useOneOneThunder', 'thunder'); B('s9OneOneScene', 'thunder');
+  B('armorCrack', 'armor'); B('goldCoinBurst', 'coin');
+  B('s5Save', 'save'); B('s5Break', 'bigHit'); B('s10Impact', 'bigHit'); B('s11gImpact', 'bigHit'); B('s11mImpact', 'bigHit');
+  B('s9BossCut', 'bigHit'); B('s11gHealPop', 'heal'); B('s11gWin', 'goal');
+  B('s2ForcedLoss', 'tackle'); B('s3ForcedLoss', 'tackle'); B('s11mGearHit', 'tackle');
+  G.playBass = function (t) { play('streak', t); };
+  G.s11gBeat = function (v) { play('heart', v); };
+
+  // — ความก้าวหน้า / ไอเทม —
+  W('gainExp', function (o, a) { var b = -1; try { b = S.lv; } catch (e) {} var r = o(); try { if (b >= 0 && S.lv > b) play('levelup'); } catch (e) {} return r; });
+  A('heal', 'heal');
+  W('showToast', function (o, a) {
+    var k = a[1]; play(k === 'epic' ? 'drop' : k === 'rare' ? 'drop' : k === 'money' ? 'coin' : k === 'miss' ? 'deny' : k === 'complete' ? 'quest' : k === 'buff' ? 'buff' : 'toast', k === 'epic');
+    return o();
+  });
+  B('showTacticalUp', 'tacup'); B('tacPopSoon', 'tacup');
+  B('mayaCheer', 'buff');
+  B('drawCards', 'cardDeal'); B('togglePickCard', 'cardPick'); B('confirmPicks', 'confirm');
+  B('showGiftModal', 'gift'); B('claimGift', 'coin'); B('showBuffaloUnlock', 'gift'); B('endlessBossReward', 'gift');
+  B('endlessMilestone', 'cheer'); B('endlessAnnounce', 'event');
+  B('showEventModal', 'event'); B('pickEventChoice', 'confirm');
+  B('showEventResult', 'toast');
+  W('eatFood', function (o, a) {
+    var before = null; try { before = S.mp; } catch (e) {}
+    var r = o();
+    try { if (before != null) { if (S.mp < before) play('munch'); else play('deny'); } } catch (e) {}
+    return r;
+  });
+  B('playBuffetFeast', 'munch'); B('debtPay', 'coin'); B('showBuffetModal', 'open');
+  B('scrTrophy', 'open'); B('openS6Gacha', 'open');
+  W('s6gPull', function (o) { play('clawMotor'); setTimeout(function () { play('clawDrop'); }, 700); return o(); });
+  B('s6gPlayGiveAnim', 'gift'); B('s6gPlayHeartAnim', 'gift');
+  B('tutDialog', 'open'); B('showTutOverlay', 'open'); B('showAutoDealSummary', 'confirm');
+  B('useRetry', 'tap'); B('askRetry', 'deny');
+
+  // — บทสนทนา / คัตซีน —
+  B('pmRender', 'blip'); B('pmTap', 'tap'); B('bubbleNext', 'bubble'); B('showDialogue', 'blip');
+  B('handleCaTap', 'tap'); B('handleCa12Tap', 'tap');
+
+  /* ---------- คลิกปุ่มทั่วไป + ปุ่มอื่นที่ไม่ได้ผูกตรง ๆ ---------- */
+  var SKIP = /doAct|zcDown|heelSpin|useOneOne|togglePickCard|phantomCut|sdDown|bcDown|s6gPull|eatFood|pickEventChoice|claimGift|confirmPicks|pmTap|handleCa/;
+  document.addEventListener('pointerdown', function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    if (t.closest('#sndWrap')) return;
+    var el = t.closest('button,[onclick],[role=button],.btn,a');
+    if (!el) return;
+    if (el.classList.contains('act')) return;
+    var sig = (el.getAttribute('onclick') || '') + (el.getAttribute('onpointerdown') || '') + (el.getAttribute('ontouchstart') || '');
+    if (SKIP.test(sig)) return;
+    if (el.disabled || el.classList.contains('disabled') || el.getAttribute('aria-disabled') === 'true') return play('deny');
+    play('click');
+  }, true);
+
+  /* ---------- สังเกต DOM: เสียงของ UI ที่เด้งขึ้นมาเอง ---------- */
+  try {
+    new MutationObserver(function (ms) {
+      for (var i = 0; i < ms.length; i++) {
+        var ad = ms[i].addedNodes;
+        for (var j = 0; j < ad.length; j++) {
+          var n = ad[j]; if (!n || n.nodeType !== 1) continue;
+          var c = n.classList; if (!c) continue;
+          if (c.contains('modal') && !c.contains('event-modal') && !c.contains('draft-modal')) play('open');
+          else if (c.contains('gbub')) play('bubble');
+          else if (c.contains('statPop')) play('stat');
+          else if (c.contains('winimg-ov')) play('cheer');
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  } catch (e) {}
+
+  /* ---------- นกหวีดในฉากคัตซีนเปิดเรื่อง (ca11 / ca12) ---------- */
+  ['caWhistle', 'c12Whistle'].forEach(function (id) {
+    var el = document.getElementById(id); if (!el) return;
+    try { new MutationObserver(function () { if (el.classList.contains('active')) play('whistle'); }).observe(el, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
+  });
+})();
 
 </script>
 </body>
