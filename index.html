@@ -9615,19 +9615,21 @@ function tallyQuests(isWin){
  return {lines, exp, mp};
 }
 function showWinImage(next){
- const imgs=['win1.webp','win2.webp','win3.webp','win4.webp','win5.webp','win6.webp'];
- const pick=imgs[Math.floor(Math.random()*imgs.length)];
- window.__winPick=pick;
- const old=document.querySelector('.winimg-ov');if(old)old.remove();
- window.__winImgNext=next;
- $('app').insertAdjacentHTML('beforeend',
-  `<div class="winimg-ov" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .25s ease" onclick="closeWinImage()">
-    <img src="${pick}" style="max-width:92%;max-height:88vh;object-fit:contain;filter:drop-shadow(0 10px 26px rgba(0,0,0,.6))" onerror="this.parentElement.remove();const n=window.__winImgNext;window.__winImgNext=null;clearTimeout(window.__winImgTimer);if(n)n()">
-    <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;color:#fff;opacity:.75;font-size:13px">แตะที่ภาพเพื่อไปต่อ</div>
-   </div>`);
- requestAnimationFrame(()=>{const ov=document.querySelector('.winimg-ov');if(ov)ov.style.opacity='1'});
- clearTimeout(window.__winImgTimer);
- window.__winImgTimer=setTimeout(closeWinImage,2200);
+  const imgs=['Win1.webp','Win2.webp','Win3.webp','Win4.webp','Win5.webp','Win6.webp'];
+  const pick=imgs[Math.floor(Math.random()*imgs.length)];
+  window.__winPick=pick;
+  const old=document.querySelector('.winimg-ov');if(old)old.remove();
+  window.__winImgNext=next;
+  
+  $('app').insertAdjacentHTML('beforeend',
+   `<div class="winimg-ov" style="position:fixed;inset:0;z-index:9999;background:rgba(5,10,20,0.95);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .25s ease" onclick="closeWinImage()">
+     <img src="${pick}" style="max-width:92%;max-height:88vh;object-fit:contain;filter:drop-shadow(0 10px 26px rgba(0,0,0,.6))" 
+          onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<h2 style=\'color:#ffd54a;font-size:40px;text-align:center;font-family:Kanit,sans-serif;text-shadow:0 0 20px #ffd54a;\'>🎉 GOAL! 🎉</h2>')">
+     <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;color:#fff;opacity:.75;font-size:13px">แตะที่หน้าจอเพื่อไปต่อ</div>
+    </div>`);
+  requestAnimationFrame(()=>{const ov=document.querySelector('.winimg-ov');if(ov)ov.style.opacity='1'});
+  clearTimeout(window.__winImgTimer);
+  window.__winImgTimer=setTimeout(closeWinImage,3000); 
 }
 function closeWinImage(){
  clearTimeout(window.__winImgTimer);
@@ -9838,7 +9840,7 @@ if(farmBlocked()){earned=0} else {S.mp=(S.mp||0)+mpEarned;debtPay(mpEarned)}
 S.cafPending=true;save();
  const tacD=tacRankUpData();
  const last=st===MAIN_STAGES-1,nxt=st+1,hasNext=st<MAIN_STAGES-1;
- const winBg=window.__winPick||['win1.webp','win2.webp','win3.webp','win4.webp','win5.webp','win6.webp'][Math.floor(Math.random()*6)];
+ const winBg=window.__winPick||['Win1.webp','Win2.webp','Win3.webp','Win4.webp','Win5.webp','Win6.webp'][Math.floor(Math.random()*6)];
  if(last&&!S.story.ending){S.story.ending=true;save()}
  if(st===2&&!R.endless&&!S.story.dropGuide){const tit=pickTutorItem();if(tit){R.giftQueue=R.giftQueue||[];R.giftQueue.unshift(tit)}R.dropTutor=!!tit;S.story.dropGuide=true;save()}
  showGifts(()=>(tacPopSoon(tacD),lvAfter(render(`<div class="win-bg" style="background-image:url('${winBg}')"></div>
