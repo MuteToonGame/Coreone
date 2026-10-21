@@ -14211,5 +14211,317 @@ setInterval(() => {
 })();
 
 </script>
+<script>
+/* ===== STRIKER FOOTBALL — SETTINGS (เสียง + ภาษา ไทย/English) =====
+   ปุ่ม ⚙️ อยู่แถวเดียวกับปุ่มเสียงมุมขวาบน · I18N.set('en'|'th') · I18N.add({'ข้อความไทย':'English'}) · I18N.missing() = รายการที่ยังไม่ได้แปล */
+(function () {
+  'use strict';
+  if (window.I18N) return;
+  var LKEY = 'striker_lang_v1', SKEY = 'striker_set_v1';
+  var lang = 'th', vidOn = true;
+  try { if (localStorage.getItem(LKEY) === 'en') lang = 'en'; } catch (e) {}
+  try { var sj = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (sj && sj.vid === false) vidOn = false; } catch (e) {}
+  var saveSet = function () { try { localStorage.setItem(SKEY, JSON.stringify({ vid: vidOn })); } catch (e) {} };
+  var has = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+
+  /* ================= พจนานุกรม ไทย → English ================= */
+  // F = ข้อความเต็มทั้งก้อน (ตรงตัว) · E = ข้อความแกนกลาง (ตัดอีโมจิ/ตัวเลข/เครื่องหมายหน้า-หลังออกก่อน) · P = regex · SUB = แทนที่ในประโยค
+  var F = {
+    'เริ่มเกมบุก (START)': 'START GAME', 'ดูเนื้อเรื่อง (Auto)': 'Watch Story (Auto)',
+    'สู้ให้อัตโนมัติ · อ่านเรื่องอย่างเดียว': 'Auto-battle · story only',
+    'เลี้ยงหลบ (Dribble)': 'Dribble Dodge', 'เลี้ยงอัด/เบียดสู้ (Power)': 'Power Charge',
+    'เลี้ยงหลบ Lv.2 (Shadow Drift)': 'Dribble Dodge Lv.2 (Shadow Drift)', 'เลี้ยงอัด Lv.2 (Buffalo Crash)': 'Power Charge Lv.2 (Buffalo Crash)',
+    'เน้น Agi และ Luk': 'Focus: Agi & Luk', 'เน้น Str และ Vit': 'Focus: Str & Vit',
+    'ล้างเซฟทั้งหมด?': 'Delete all save data?', 'ยังไม่มีเซฟ': 'No save data yet',
+    'ก๊อปปี้โค้ดด้านล่างนี้เก็บไว้ที่นี่:': 'Copy the code below and keep it somewhere safe:',
+    'วางโค้ดเซฟเกมที่ก๊อปปี้มาตรงนี้:': 'Paste your save code here:',
+    'โหลดเซฟสำเร็จ! ลุยต่อได้เลย': 'Save loaded! Ready to continue.', 'โค้ดไม่ถูกต้อง ลองใหม่อีกทีนะครับ': 'Invalid code. Please try again.',
+    'คัดลอกข้อความนี้ส่งในแชท:': 'Copy this text and send it in chat:', 'ออกจากด่าน? EXP ที่ได้ถูกบันทึกแล้ว': 'Leave the stage? EXP earned so far is saved.',
+    'ล้างตำแหน่งที่แก้ไว้ทั้งหมด?': 'Reset all edited positions?',
+    'กำลังพาบอลบุกขึ้นหน้า...': 'Dribbling the ball forward...', 'กองหลังพุ่งเข้าสกัด!': 'The defender lunges in!',
+    'เสียงเอฟเฟกต์: เปิด': 'Sound effects: On', 'เสียงเอฟเฟกต์: ปิด': 'Sound effects: Off',
+    'เพลงพื้นหลัง: เปิด': 'Music: On', 'เพลงพื้นหลัง: ปิด': 'Music: Off', 'ตั้งค่า': 'Settings',
+    'ยังไม่ได้ปลดล็อก': 'Not unlocked yet', 'แตะหน้าจอเพื่อไปต่อ': 'Tap the screen to continue',
+    'ผลภารกิจประจำด่าน': 'Stage Mission Results', 'ไปตู้เกียรติยศ': 'Go to Trophy Cabinet'
+  };
+  var E = {
+    // หน้าแรก / แผนที่
+    'ระวัง': 'WARNING', 'เกมนี้': 'This game has', 'ไม่มีปุ่มส่ง': 'NO PASS BUTTON', 'นักเตะ': 'Player', 'เงินสะสม': 'Savings', 'เล่น': 'PLAY',
+    'เลือกด่าน': 'Select Stage', 'ปลดล็อก': 'Unlocked', 'กลับหน้าแรก': 'Back to Title', 'ด่าน': 'Stage', 'หลังจบเกม': 'After the game', 'ไร้ขีดจำกัด': 'Unlimited',
+    'เริ่มด่าน': 'Start Stage',
+    // ทีม / ด่าน
+    'ไทย': 'Thailand', 'ญี่ปุ่น': 'Japan', 'เกาหลีใต้': 'South Korea', 'จีน': 'China', 'สหรัฐอเมริกา': 'USA', 'เนเธอร์แลนด์': 'Netherlands',
+    'สเปน': 'Spain', 'อาร์เจนตินา': 'Argentina', 'ฝรั่งเศส': 'France', 'บราซิล': 'Brazil', 'ทีมปริศนา': 'Mystery Team',
+    // ตัวละคร
+    'มายา': 'Maya', 'โจ': 'Jo', 'กัมป์': 'Gump', 'โค้ชวิค': 'Coach Vik', 'โค้ช': 'Coach', 'แม็ค': 'Mack', 'พี่แม็ค': 'Mack', 'ไค': 'Kai', 'ฮายาโตะ': 'Hayato',
+    // ปุ่ม / ระบบทั่วไป
+    'ปิด': 'Close', 'ยกเลิก': 'Cancel', 'ตกลง': 'OK', 'ข้าม': 'Skip', 'แตะเพื่อไปต่อ': 'Tap to continue', 'ต่อไป': 'Next', 'ลุยเลย!': "Let's go!",
+    'ขอบคุณ': 'Thanks', 'ขอบคุณครับ': 'Thank you', 'เลือก': 'Select', 'พักครึ่ง': 'Halftime', 'จบครึ่งแรก': 'End of first half',
+    'ชนะ': 'Win', 'แพ้': 'Lose', 'ผ่าน': 'Pass', 'พลาด': 'Miss', 'สำเร็จ': 'Success', 'ไม่สำเร็จ': 'Failed', 'ได้รับ': 'Received', 'ฟรี': 'Free',
+    'รีเซ็ต': 'Reset', 'ส่งออก': 'Export', 'คัดลอก': 'Copy', 'คัดลอกแล้ว!': 'Copied!', 'ถาวร': 'Permanent', 'การ์ด': 'Card', 'เกราะ': 'Armor',
+    'โบนัส': 'Bonus', 'แทคติก': 'Tactics', 'ฮีล': 'Heal', 'แต้ม': 'Points', 'ระบบ': 'System', 'โอกาส': 'Chance', 'โอกาสผ่าน': 'Pass chance',
+    'เลเวลปัจจุบัน': 'Current level', 'เงินที่ได้': 'Money earned', 'หมดแรงแล้ว': 'Out of energy', 'หมดแรง': 'Exhausted',
+    'ล็อค!': 'Locked!', 'ไพ่ตาย': 'Last Card', 'เดิมพัน': 'Gamble', 'จั่ว': 'Draw', 'ผู้รักษาประตู': 'Goalkeeper', 'กองหลัง': 'Defender',
+    'ท่านี้ไม่ไหว': "Can't use this move", 'ชนะทาง': 'Counter win', 'แพ้ทาง': 'Countered', 'ถูกอ่านแล้ว': 'Read!', 'เหนื่อย': 'Tired',
+    'ตั้งค่า': 'Settings', 'ยกเลิกการเลือก': 'Deselect'
+  };
+  var P = [
+    [/^เน้น Dex และ Luk · (.*)กดค้างชาร์จ MAX = \+(\d+)%$/, 'Focus: Dex & Luk · $1Hold to charge MAX = +$2%'],
+    [/^ปลดล็อก (\d+\/\d+)$/, 'Unlocked $1']
+  ];
+  var SUB = [];
+
+  /* ================= ตัวแปล ================= */
+  var TH = /[\u0E01-\u0E3A\u0E40-\u0E4E]/;   // ตัวอักษรไทย (ไม่นับ ฿ และเลขไทย)
+  var missing = {}, missN = 0;
+  function note(s) { if (missN < 3000 && !has(missing, s)) { missing[s] = 1; missN++; } }
+  function trStr(s) {
+    if (!TH.test(s)) return s;
+    var m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s), lead = m[1], body = m[2], trail = m[3], i;
+    if (has(F, body)) return lead + F[body] + trail;
+    for (i = 0; i < P.length; i++) if (P[i][0].test(body)) return lead + body.replace(P[i][0], P[i][1]) + trail;
+    var a = -1, b = -1;
+    for (i = 0; i < body.length; i++) if (TH.test(body.charAt(i))) { if (a < 0) a = i; b = i; }
+    var core = body.slice(a, b + 1);
+    if (has(E, core)) return lead + body.slice(0, a) + E[core] + body.slice(b + 1) + trail;
+    var out = body;
+    for (i = 0; i < SUB.length; i++) if (out.indexOf(SUB[i][0]) > -1) out = out.split(SUB[i][0]).join(SUB[i][1]);
+    if (TH.test(out)) note(core);
+    return lead + out + trail;
+  }
+  var trMulti = function (s) { return String(s).split('\n').map(trStr).join('\n'); };
+
+  var recs = new WeakMap(), arecs = new WeakMap();
+  var ATTRS = ['title', 'placeholder', 'aria-label', 'alt'];
+  var inModal = function (n) { var p = n.nodeType === 1 ? n : n.parentNode; return !!(p && p.closest && p.closest('#stgOv')); };
+
+  function doText(n) {
+    var v = n.nodeValue, r = recs.get(n);
+    if (r && v === r.t) v = r.o;
+    if (!TH.test(v)) { if (r && n.nodeValue !== r.t) recs.delete(n); return; }
+    if (inModal(n)) return;
+    var t = trStr(v);
+    if (t !== n.nodeValue) n.nodeValue = t;
+    if (t !== v) recs.set(n, { o: v, t: t }); else recs.delete(n);
+  }
+  function undoText(n) { var r = recs.get(n); if (r) { if (n.nodeValue === r.t) n.nodeValue = r.o; recs.delete(n); } }
+  function doAttrs(el) {
+    if (inModal(el)) return;
+    var rec = arecs.get(el) || {}, any = false;
+    ATTRS.forEach(function (a) {
+      if (!el.hasAttribute || !el.hasAttribute(a)) return;
+      var cur = el.getAttribute(a), r = rec[a];
+      if (r && cur === r.t) cur = r.o;
+      if (!TH.test(cur)) { if (r) delete rec[a]; return; }
+      var t = trStr(cur);
+      if (t !== el.getAttribute(a)) el.setAttribute(a, t);
+      if (t !== cur) { rec[a] = { o: cur, t: t }; any = true; } else delete rec[a];
+    });
+    if (any) arecs.set(el, rec);
+  }
+  function undoAttrs(el) {
+    var rec = arecs.get(el); if (!rec) return;
+    Object.keys(rec).forEach(function (a) { if (el.getAttribute(a) === rec[a].t) el.setAttribute(a, rec[a].o); });
+    arecs.delete(el);
+  }
+  function walk(root, tf, af) {
+    if (!root) return;
+    if (root.nodeType === 3) { tf(root); return; }
+    if (root.nodeType !== 1) return;
+    var tag = root.nodeName; if (tag === 'SCRIPT' || tag === 'STYLE') return;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) { var pn = n.parentNode && n.parentNode.nodeName; if (pn === 'SCRIPT' || pn === 'STYLE') continue; tf(n); }
+    af(root);
+    var els = root.querySelectorAll('[title],[placeholder],[aria-label],[alt]');
+    for (var i = 0; i < els.length; i++) af(els[i]);
+  }
+  var apply = function (root) { walk(root, doText, doAttrs); };
+  var undo = function (root) { walk(root, undoText, undoAttrs); };
+
+  var pend = new Set(), pendA = new Set(), sched = false, mo = null;
+  function flush() {
+    sched = false;
+    var arr = Array.from(pend), arrA = Array.from(pendA); pend.clear(); pendA.clear();
+    if (lang === 'en') {
+      arr.forEach(function (n) { if (n.isConnected) apply(n); });
+      arrA.forEach(function (n) { if (n.isConnected) doAttrs(n); });
+    }
+    if (mo) mo.takeRecords();
+  }
+  try {
+    mo = new MutationObserver(function (ms) {
+      if (lang !== 'en') return;
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i];
+        if (m.type === 'characterData') pend.add(m.target);
+        else if (m.type === 'attributes') pendA.add(m.target);
+        else for (var j = 0; j < m.addedNodes.length; j++) pend.add(m.addedNodes[j]);
+      }
+      if (!sched && (pend.size || pendA.size)) { sched = true; requestAnimationFrame(flush); }
+    });
+    mo.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+  } catch (e) {}
+
+  ['alert', 'confirm', 'prompt'].forEach(function (nm) {
+    var o = window[nm]; if (typeof o !== 'function') return;
+    window[nm] = function () {
+      var a = Array.prototype.slice.call(arguments);
+      if (lang === 'en') { if (typeof a[0] === 'string') a[0] = trMulti(a[0]); if (nm === 'prompt' && typeof a[1] === 'string') a[1] = trMulti(a[1]); }
+      return o.apply(window, a);
+    };
+  });
+
+  /* ================= เสียงวิดีโอ ================= */
+  try {
+    var _pl = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () { if (!vidOn && this.tagName === 'VIDEO') this.muted = true; return _pl.apply(this, arguments); };
+  } catch (e) {}
+  function applyVid() {
+    var vs = document.querySelectorAll('video');
+    for (var i = 0; i < vs.length; i++) { try { if (!vidOn) vs[i].muted = true; else if (!vs[i].paused) vs[i].muted = false; } catch (e) {} }
+  }
+
+  /* ================= หน้าตั้งค่า ================= */
+  var UI = {
+    th: { title: 'ตั้งค่า', sound: 'เสียง', master: 'เสียงทั้งหมด', sfx: 'เสียงเอฟเฟกต์', bgm: 'เพลงพื้นหลัง', vid: 'เสียงวิดีโอ / คัตซีน',
+      lang: 'ภาษา', done: 'เสร็จสิ้น', hint: 'กด M บนคีย์บอร์ด = ปิด/เปิดเสียงทั้งหมด', note: '', close: 'ปิด' },
+    en: { title: 'Settings', sound: 'Sound', master: 'All sound', sfx: 'Sound effects', bgm: 'Background music', vid: 'Video / cutscene audio',
+      lang: 'Language', done: 'Done', hint: 'Press M on keyboard = mute / unmute all', note: 'Menus and buttons are translated. Story dialogue is still in Thai for now.', close: 'Close' }
+  };
+  var FLAG_TH = '<svg viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#fff"/><rect width="60" height="6.67" fill="#A51931"/><rect y="33.33" width="60" height="6.67" fill="#A51931"/><rect y="13.33" width="60" height="13.34" fill="#2D2A4A"/></svg>';
+  var FLAG_EN = '<svg viewBox="0 0 60 30" aria-hidden="true"><clipPath id="stgUkS"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="stgUkT"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#stgUkS)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#stgUkT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>';
+
+  var ov, box, pollT = 0, gear = null;
+  var cfgOf = function () { return (window.SFX && window.SFX.cfg) || { sfx: true, bgm: true }; };
+  var state = function () { var c = cfgOf(); return { sfx: !!c.sfx, bgm: !!c.bgm, vid: vidOn }; };
+  var sw = function (on) { return '<span class="stg-sw' + (on ? ' on' : '') + '"><i></i></span>'; };
+
+  function buildCSS() {
+    if (document.getElementById('stgCss')) return;
+    var st = document.createElement('style'); st.id = 'stgCss';
+    st.textContent =
+      '#stgOv{position:fixed;inset:0;z-index:2147483100;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(3,4,14,.74);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);font-family:Kanit,Rajdhani,"Noto Sans Thai",sans-serif}' +
+      '#stgOv.on{display:flex}' +
+      '#stgBox{width:100%;max-width:380px;max-height:92vh;max-height:92dvh;overflow:auto;color:#eaf6f0;padding:16px;border-radius:18px;border:1.5px solid rgba(61,242,255,.55);background:linear-gradient(165deg,rgba(22,26,56,.98),rgba(8,10,24,.99));box-shadow:0 0 28px rgba(61,242,255,.26),0 18px 42px rgba(0,0,0,.7)}' +
+      '#stgBox .stg-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}' +
+      '#stgBox .stg-tt{font-size:22px;font-weight:900;color:#ffd54a;letter-spacing:.3px;text-shadow:0 2px 0 rgba(0,0,0,.5),0 0 10px rgba(255,213,74,.35)}' +
+      '#stgBox .stg-x{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.22);-webkit-tap-highlight-color:transparent}' +
+      '#stgBox .stg-sec{font-size:12px;font-weight:800;letter-spacing:1.5px;color:#3df2ff;margin:14px 0 6px;text-transform:uppercase}' +
+      '#stgBox .stg-row{display:flex;align-items:center;gap:10px;padding:11px 12px;margin-bottom:7px;border-radius:12px;cursor:pointer;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none}' +
+      '#stgBox .stg-row.m{background:rgba(61,242,255,.09);border-color:rgba(61,242,255,.4)}' +
+      '#stgBox .stg-ic{font-size:20px;width:26px;text-align:center;flex-shrink:0}' +
+      '#stgBox .stg-lb{flex:1;font-size:15px;font-weight:700;line-height:1.2}' +
+      '#stgBox .stg-sw{position:relative;width:46px;height:26px;border-radius:99px;flex-shrink:0;background:#3a3f55;border:1.5px solid rgba(255,255,255,.25);transition:background .15s}' +
+      '#stgBox .stg-sw i{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.5);transition:transform .15s}' +
+      '#stgBox .stg-sw.on{background:linear-gradient(160deg,#35e0a1,#0e9a6a);border-color:rgba(255,255,255,.55)}' +
+      '#stgBox .stg-sw.on i{transform:translateX(20px)}' +
+      '#stgBox .stg-lang{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
+      '#stgBox .stg-lg{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px 12px;border-radius:14px;cursor:pointer;background:rgba(255,255,255,.055);border:2px solid rgba(255,255,255,.14);-webkit-tap-highlight-color:transparent;touch-action:manipulation}' +
+      '#stgBox .stg-lg.on{border-color:#ffd54a;background:rgba(255,213,74,.12);box-shadow:0 0 14px rgba(255,213,74,.35)}' +
+      '#stgBox .stg-lg.on::after{content:"✓";position:absolute;top:6px;right:8px;font-size:14px;font-weight:900;color:#ffd54a}' +
+      '#stgBox .stg-fl{width:60px;height:40px;border-radius:6px;overflow:hidden;border:1.5px solid rgba(255,255,255,.55);box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex}' +
+      '#stgBox .stg-fl svg{width:100%!important;height:100%!important;display:block}' +
+      '#stgBox .stg-ln{font-size:16px;font-weight:800}' +
+      '#stgBox .stg-hint{font-size:12px;color:#9aa6c4;margin-top:12px;line-height:1.4;text-align:center}' +
+      '#stgBox .stg-note{font-size:12px;color:#ffd54a;opacity:.9;margin-top:8px;line-height:1.4;text-align:center}' +
+      '#stgBox .stg-done{margin-top:14px;padding:13px;border-radius:12px;text-align:center;font-size:16px;font-weight:900;cursor:pointer;color:#231900;background:linear-gradient(160deg,#ffe58a,#ffd54a 55%,#e0a600);box-shadow:0 3px 0 rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent}' +
+      '#stgBtnFb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:78px;z-index:2147483000;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;background:rgba(10,12,30,.72);border:1.5px solid rgba(61,242,255,.65)}';
+    document.head.appendChild(st);
+  }
+
+  function buildModal() {
+    var T = UI[lang], s = state(), any = s.sfx || s.bgm || s.vid;
+    if (!ov) {
+      ov = document.createElement('div'); ov.id = 'stgOv'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+      box = document.createElement('div'); box.id = 'stgBox'; ov.appendChild(box); document.body.appendChild(ov);
+      ov.addEventListener('click', function (e) { if (e.target === ov) closeSettings(); });
+      box.addEventListener('click', onBox);
+    }
+    box.innerHTML =
+      '<div class="stg-hd"><div class="stg-tt">⚙️ ' + T.title + '</div><div class="stg-x" role="button" data-a="close" aria-label="' + T.close + '">✕</div></div>' +
+      '<div class="stg-sec">🔊 ' + T.sound + '</div>' +
+      '<div class="stg-row m" role="button" data-a="master"><span class="stg-ic">' + (any ? '🔊' : '🔇') + '</span><span class="stg-lb">' + T.master + '</span>' + sw(any) + '</div>' +
+      '<div class="stg-row" role="button" data-a="sfx"><span class="stg-ic">💥</span><span class="stg-lb">' + T.sfx + '</span>' + sw(s.sfx) + '</div>' +
+      '<div class="stg-row" role="button" data-a="bgm"><span class="stg-ic">🎵</span><span class="stg-lb">' + T.bgm + '</span>' + sw(s.bgm) + '</div>' +
+      '<div class="stg-row" role="button" data-a="vid"><span class="stg-ic">🎬</span><span class="stg-lb">' + T.vid + '</span>' + sw(s.vid) + '</div>' +
+      '<div class="stg-sec">🌐 ' + T.lang + '</div>' +
+      '<div class="stg-lang">' +
+        '<div class="stg-lg' + (lang === 'th' ? ' on' : '') + '" role="button" data-a="lang-th"><div class="stg-fl">' + FLAG_TH + '</div><div class="stg-ln">ไทย</div></div>' +
+        '<div class="stg-lg' + (lang === 'en' ? ' on' : '') + '" role="button" data-a="lang-en"><div class="stg-fl">' + FLAG_EN + '</div><div class="stg-ln">English</div></div>' +
+      '</div>' +
+      (T.note ? '<div class="stg-note">' + T.note + '</div>' : '') +
+      '<div class="stg-hint">' + T.hint + '</div>' +
+      '<div class="stg-done" role="button" data-a="close">' + T.done + '</div>';
+  }
+  // อัปเดตสวิตช์โดยไม่สร้างหน้าใหม่ (ใช้ตอนกดปุ่มเสียงมุมขวาบน/กด M ขณะเปิดหน้าตั้งค่า)
+  function paint() {
+    if (!box || !ov.classList.contains('on')) return;
+    var s = state(), any = s.sfx || s.bgm || s.vid;
+    var set = function (k, on) { var r = box.querySelector('[data-a="' + k + '"] .stg-sw'); if (r) r.classList.toggle('on', on); };
+    set('master', any); set('sfx', s.sfx); set('bgm', s.bgm); set('vid', s.vid);
+    var ic = box.querySelector('[data-a="master"] .stg-ic'); if (ic) ic.textContent = any ? '🔊' : '🔇';
+  }
+  function setSound(k, v) {
+    var c = cfgOf();
+    if (k === 'vid') { vidOn = v; saveSet(); applyVid(); return; }
+    if (window.SFX && !!c[k] !== v) window.SFX.toggle(k);
+  }
+  function onBox(e) {
+    var el = e.target.closest && e.target.closest('[data-a]'); if (!el) return;
+    var a = el.getAttribute('data-a'), s = state();
+    if (a === 'close') closeSettings();
+    else if (a === 'master') { var v = !(s.sfx || s.bgm || s.vid); setSound('sfx', v); setSound('bgm', v); setSound('vid', v); paint(); if (v && window.SFX) window.SFX.play('confirm'); }
+    else if (a === 'sfx' || a === 'bgm' || a === 'vid') { setSound(a, !s[a]); paint(); if (a !== 'vid' && state()[a] && window.SFX) window.SFX.play('confirm'); }
+    else if (a === 'lang-th') setLang('th');
+    else if (a === 'lang-en') setLang('en');
+  }
+  function openSettings() {
+    buildCSS(); buildModal(); ov.classList.add('on');
+    clearInterval(pollT); pollT = setInterval(paint, 350);
+  }
+  function closeSettings() { if (ov) ov.classList.remove('on'); clearInterval(pollT); }
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && ov && ov.classList.contains('on')) closeSettings();
+  });
+
+  function setLang(l) {
+    l = l === 'en' ? 'en' : 'th';
+    if (l === lang) return;
+    lang = l;
+    try { localStorage.setItem(LKEY, l); } catch (e) {}
+    document.documentElement.lang = l;
+    if (l === 'en') apply(document.body); else undo(document.body);
+    if (mo) mo.takeRecords();
+    if (gear) { var g = UI[l].title; gear.title = g; gear.setAttribute('aria-label', g); }
+    if (ov && ov.classList.contains('on')) buildModal();
+    try { window.dispatchEvent(new CustomEvent('langchange', { detail: l })); } catch (e) {}
+  }
+
+  /* ================= ปุ่ม ⚙️ ================= */
+  function buildGear() {
+    buildCSS();
+    var wrap = document.getElementById('sndWrap');
+    if (wrap) { Array.prototype.slice.call(wrap.querySelectorAll('button')).forEach(function (b) { if (b.id !== 'stgBtn') b.remove(); }); }  // เอาปุ่มเสียง 🔊🎵 เดิมออก เหลือแต่ ⚙️
+    gear = document.createElement(wrap ? 'button' : 'div');
+    gear.id = 'stgBtn'; if (wrap) gear.type = 'button'; else { gear.id = 'stgBtnFb'; gear.setAttribute('role', 'button'); }
+    gear.textContent = '⚙️'; gear.title = UI[lang].title; gear.setAttribute('aria-label', UI[lang].title);
+    gear.addEventListener('click', function (e) { e.stopPropagation(); if (window.SFX) window.SFX.play('open'); openSettings(); });
+    (wrap || document.body).appendChild(gear);
+  }
+
+  window.I18N = {
+    get lang() { return lang; },
+    set: setLang, t: function (s) { return lang === 'en' ? trMulti(s) : s; },
+    add: function (o) { if (!o) return; Object.keys(o).forEach(function (k) { F[k] = o[k]; delete missing[k]; }); if (lang === 'en') apply(document.body); },
+    missing: function () { var a = Object.keys(missing); try { console.log('[I18N] ยังไม่ได้แปล ' + a.length + ' รายการ\n' + a.join('\n')); } catch (e) {} return a; },
+    open: openSettings, close: closeSettings
+  };
+
+  buildGear();
+  if (lang === 'en') { document.documentElement.lang = 'en'; apply(document.body); if (mo) mo.takeRecords(); }
+  applyVid();
+})();
+</script>
+
 </body>
 </html>
