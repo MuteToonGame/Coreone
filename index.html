@@ -3828,7 +3828,7 @@ function availableActs(){
  a.push('PWD');
  a.push('TEC');
  if(statGet('lockTEC')>0&&!zeroLessonOn()&&!isS5Gk()&&!isS9Boss()){
-  a=a.filter(x=>x!=='TEC');
+  a=a.filter(x=>x!==(bodyClass(_wt())==='vthin'?'PWD':'DRB')); // ผอมมาก → ล็อก PWD (เลี้ยงอัด) · อ้วนมาก → ล็อก DRB (เลี้ยงหลบ)
  }
  return a;
 }
@@ -4773,10 +4773,12 @@ const CARDS = [
   // 30
   { t:'LUK', n:'⚙️ Overburn Engine',
     d:'ไอเทมสวมใส่ทำงานแรงขึ้น 2 เท่า แต่อัตราการเผาผลาญ (Burn) x2',
+    one:1,
     fn:r=>{ r.overburn = true; log('⚙️ Overburn Engine ทำงาน!','info'); }
   },
   // 31
   { t:'LUK', n:'🔀 โยกหลอกถ่ายน้ำหนัก',
+    one:1,
     get d(){ return 'รีดน้ำหนักทิ้ง 3kg ทันที แลกกับการฮีลเลือด '+cardScale(20,1,30)+'% และ LUK +'+cardScale(6,1,12)+'%'+cardTag(); },
     fn:r=>{
       if(S && S.body) {
@@ -5445,9 +5447,13 @@ function scrTitle() {
   ONB_AUTO = false;
   R = null;
   clearTimeout(TIMER);
-  render(`<div class="title-screen" style="position: relative; width: 100%; height: 100vh; overflow: hidden;">
+  render(`<div class="title-screen" style="position: relative; width: 100%; height: 100vh; height: 100dvh; overflow: hidden;">
   <div class="title-art" style="background-image:url('Open.webp'); position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: 1;"></div>
   
+  <div class="title-io" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);left:8px;z-index:3;display:flex;gap:8px">
+   <button onclick="exportSave()" title="บันทึกเซฟ (SAVE)" aria-label="บันทึกเซฟ (SAVE)" style="width:38px;height:38px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1.5px solid rgba(255,255,255,.7);background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M8 3v5h7V3"/><rect x="7" y="13" width="10" height="8"/></svg></button>
+   <button onclick="importSave()" title="โหลดเซฟ (LOAD)" aria-label="โหลดเซฟ (LOAD)" style="width:38px;height:38px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1.5px solid rgba(255,255,255,.7);background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v2"/><path d="M3 7v11a1 1 0 0 0 1 1h14l3-8H7.5L5 19"/></svg></button>
+  </div>
   <div class="title-content" style="position: absolute; bottom: 30px; left: 0; width: 100%; padding: 0 20px; box-sizing: border-box; z-index: 2;">
    
    <div class="title-panel" style="background: linear-gradient(165deg, rgba(8, 12, 24, 0.75), rgba(4, 5, 10, 0.95)); border: 1.5px solid rgba(255, 215, 0, 0.4); box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 15px rgba(255, 215, 0, 0.15); border-radius: 20px; padding: 25px 20px; backdrop-filter: blur(4px);">
@@ -5474,10 +5480,6 @@ function scrTitle() {
      `<button class="btn-y" onclick="scrIntroStory()" style="padding: 16px 24px; font-size: 20px; width: 100%; background: linear-gradient(160deg, #ffe500, #ff8c00); color: #fff; font-weight: 900; font-style: italic; text-shadow: 2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000; box-shadow: 0 6px 20px rgba(255, 140, 0, 0.6); border: 2px solid #fff; letter-spacing: 2px; border-radius: 12px; transform: skewX(-5deg);">🔥 เริ่มเกมบุก (START)</button>`}
     </div>
      </div>
-    <div style="display:flex; gap:8px; margin-top:10px; width:100%;">
-      <button class="btn-g" onclick="exportSave()" style="flex:1; padding:10px; border-radius:8px; font-weight:bold; border:1px solid #fff; background:rgba(0,0,0,0.5);">💾 SAVE</button>
-      <button class="btn-g" onclick="importSave()" style="flex:1; padding:10px; border-radius:8px; font-weight:bold; border:1px solid #fff; background:rgba(0,0,0,0.5);">📥 LOAD</button>
-    </div>
     ${ONB_SHOW_AUTO_BTN?`<button onclick="onbStartAuto()" style="width:100%;margin-top:10px;padding:12px 10px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(160deg,#7a6bff,#3b2fbf);border:1px solid rgba(255,255,255,.55);border-radius:10px;box-shadow:0 4px 14px rgba(90,80,255,.45);line-height:1.3">📖 ดูเนื้อเรื่อง (Auto)<br><span style="font-size:11px;font-weight:500;opacity:.85">สู้ให้อัตโนมัติ · อ่านเรื่องอย่างเดียว</span></button>`:''}
    </div>
   </div>
@@ -5486,8 +5488,43 @@ function scrTitle() {
 }
 
 function resetAll(){if(confirm('ล้างเซฟทั้งหมด?')){S=newSave();save();scrTitle()}}
-function exportSave(){const d=localStorage.getItem(KEY);if(!d){alert('ยังไม่มีเซฟ');return}prompt('ก๊อปปี้โค้ดด้านล่างนี้เก็บไว้ที่นี่:',btoa(encodeURIComponent(d)))}
-function importSave(){const c=prompt('วางโค้ดเซฟเกมที่ก๊อปปี้มาตรงนี้:');if(!c)return;try{const d=decodeURIComponent(atob(c));JSON.parse(d);localStorage.setItem(KEY,d);load();alert('โหลดเซฟสำเร็จ! ลุยต่อได้เลย');scrTitle()}catch(e){alert('โค้ดไม่ถูกต้อง ลองใหม่อีกทีนะครับ')}}
+async function exportSave(){
+ const d=localStorage.getItem(KEY);if(!d){alert('ยังไม่มีเซฟ');return}
+ const code=await saveEncode(d);
+ const old=document.getElementById('saveCopyOv');if(old)old.remove();
+ const ov=document.createElement('div');ov.id='saveCopyOv';
+ ov.style.cssText='position:fixed;inset:0;z-index:2147483200;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,4,14,.8)';
+ ov.innerHTML='<div style="width:100%;max-width:420px;background:#0b1020;border:1.5px solid rgba(255,215,0,.5);border-radius:16px;padding:16px;color:#fff;font-family:Kanit,sans-serif;text-align:center">'
+  +'<div style="font-weight:800;font-size:18px;margin-bottom:8px">💾 โค้ดเซฟของคุณ</div>'
+  +'<textarea id="saveCopyTa" readonly style="width:100%;height:90px;box-sizing:border-box;border-radius:8px;border:1px solid #555;background:#000;color:#9fe;font-size:11px;padding:6px;resize:none"></textarea>'
+  +'<div id="saveCopyMsg" style="min-height:20px;font-size:13px;margin:6px 0;color:#7dff9a"></div>'
+  +'<div style="display:flex;gap:8px"><button id="saveCopyBtn" style="flex:2;padding:12px;border:none;border-radius:10px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(160deg,#ffdf00,#ff8c00)">📋 คัดลอกโค้ด</button>'
+  +'<button id="saveCopyClose" style="flex:1;padding:12px;border-radius:10px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1px solid #888">ปิด</button></div></div>';
+ document.body.appendChild(ov);
+ const ta=document.getElementById('saveCopyTa'),msg=document.getElementById('saveCopyMsg');
+ ta.value=code;
+ msg.style.color='#bcd';msg.textContent='ความยาวโค้ด '+code.length+' ตัวอักษร';
+ const done=ok=>{msg.style.color=ok?'#7dff9a':'#ff8a8a';msg.textContent=ok?'✅ คัดลอกแล้ว! เอาไปวางเก็บไว้ได้เลย':'คัดลอกอัตโนมัติไม่ได้ — กดค้างในช่องแล้วเลือกคัดลอกเอง'};
+ const fallback=()=>{try{ta.focus();ta.select();ta.setSelectionRange(0,code.length);done(document.execCommand('copy'))}catch(e){done(false)}};
+ document.getElementById('saveCopyBtn').onclick=()=>{
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(code).then(()=>done(true),fallback);
+  else fallback()};
+ document.getElementById('saveCopyClose').onclick=()=>ov.remove();
+}
+/* โค้ดเซฟแบบสั้น: JSON → UTF-8 → deflate → base64url · นำหน้า SF1: (บีบอัด) / SF0: (ไม่บีบอัด เผื่อเบราว์เซอร์เก่า) · โค้ดเก่า (ไม่มีคำนำหน้า) ยังโหลดได้ */
+function _b64u(u8){let b='';for(let i=0;i<u8.length;i+=8192)b+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function _unb64u(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+async function _pipe(u8,Stream,kind){const st=new Stream(kind);const w=st.writable.getWriter();w.write(u8);w.close();return new Uint8Array(await new Response(st.readable).arrayBuffer())}
+async function saveEncode(json){
+ const u8=new TextEncoder().encode(json);
+ if(typeof CompressionStream!=='undefined'){try{return 'SF1:'+_b64u(await _pipe(u8,CompressionStream,'deflate-raw'))}catch(e){}}
+ return 'SF0:'+_b64u(u8)}
+async function saveDecode(code){
+ code=String(code||'').replace(/\s+/g,'');
+ if(code.indexOf('SF1:')===0){if(typeof DecompressionStream==='undefined')throw new Error('nodecomp');return new TextDecoder().decode(await _pipe(_unb64u(code.slice(4)),DecompressionStream,'deflate-raw'))}
+ if(code.indexOf('SF0:')===0)return new TextDecoder().decode(_unb64u(code.slice(4)));
+ return decodeURIComponent(atob(code))}
+async function importSave(){const c=prompt('วางโค้ดเซฟเกมที่ก๊อปปี้มาตรงนี้:');if(!c)return;try{const d=await saveDecode(c);JSON.parse(d);localStorage.setItem(KEY,d);load();alert('โหลดเซฟสำเร็จ! ลุยต่อได้เลย');scrTitle()}catch(e){alert('โค้ดไม่ถูกต้อง หรือโค้ดไม่ครบ (ถูกตัดตอนวาง) ลองใหม่อีกทีนะครับ')}}
 
 function scrCustomize(){scrMap()}
 
@@ -14585,7 +14622,15 @@ setInterval(() => {
   if (window.I18N) return;
   var LKEY = 'striker_lang_v1', SKEY = 'striker_set_v1';
   var lang = 'th', vidOn = true;
-  try { if (localStorage.getItem(LKEY) === 'en') lang = 'en'; } catch (e) {}
+  /* ภาษาเริ่มต้น: ถ้าผู้เล่นเคยเลือกเองแล้วใช้ตามนั้น · ไม่เคยเลือก → เครื่องตั้งภาษาไทยไว้ (th) = ไทย, นอกนั้น = English */
+  try {
+    var sl = localStorage.getItem(LKEY);
+    if (sl === 'en' || sl === 'th') lang = sl;
+    else {
+      var nl = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+      lang = nl.some(function (x) { return String(x).toLowerCase().indexOf('th') === 0; }) ? 'th' : 'en';
+    }
+  } catch (e) {}
   try { var sj = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (sj && sj.vid === false) vidOn = false; } catch (e) {}
   var saveSet = function () { try { localStorage.setItem(SKEY, JSON.stringify({ vid: vidOn })); } catch (e) {} };
   var has = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
