@@ -4801,7 +4801,7 @@ function newSave(){return{saveVersion:3,name:'',natIdx:0,lv:1,exp:0,st:{str:3,ag
 const playerName=()=>{const n=(S&&S.name&&S.name.trim())?S.name.trim().slice(0,14).replace(/[<>]/g,'').trim():'';return n||'กัมป์'};
 /* PN: ข้อความสคริปต์ที่เขียนคำว่า 'กัมป์' (ชื่อเริ่มต้น) จะถูกแทนด้วยชื่อผู้เล่นตอนแสดงผลจริง */
 const PN_DEF='กัมป์';
-function pnSync(){try{document.documentElement.style.setProperty('--pn',JSON.stringify(playerName()))}catch(e){}}
+function pnSync(){try{let n=playerName();if(n===PN_DEF&&window.I18N&&window.I18N.lang==='en')n=window.I18N.t(n);document.documentElement.style.setProperty('--pn',JSON.stringify(n))}catch(e){}}
 function PN(t){if(typeof t!=='string'||t.indexOf(PN_DEF)<0)return t;return t.split(PN_DEF).join(playerName())}
 function PNo(o){if(!o||typeof o!=='object')return o;pnSync();const c=Object.assign({},o);['who','name','label','text','sub','dir','tag'].forEach(k=>{if(typeof c[k]==='string')c[k]=PN(c[k])});return c}
 function setName(v){S.name=(v||'').slice(0,14);save();pnSync()}
@@ -9127,18 +9127,33 @@ function spawnFX(kind){
  }
  p.insertAdjacentHTML('beforeend',html)}
 function statPop(hp,stK,stV){
-  if(!document.getElementById('statPopCSS')){const s=document.createElement('style');s.id='statPopCSS';s.textContent='.statPop{position:absolute;left:calc(10% - var(--sp) + 52px);bottom:calc(178px + var(--up));z-index:11;pointer-events:none;font:900 22px/1.1 "Kanit",sans-serif;white-space:nowrap;animation:statPopK 1.2s cubic-bezier(.2,1.2,.4,1) forwards}.statPop div{color:var(--pc,#4dff9a);text-shadow:0 0 10px var(--pc,#4dff9a),0 0 20px var(--pc,#4dff9a),0 2px 0 rgba(0,0,0,.75);display:flex;align-items:baseline;gap:3px}.statPop div small{font-size:12px;font-weight:800;opacity:.9}.statPop div+div{font-size:18px;margin-top:-2px;opacity:.92}@keyframes statPopK{0%{opacity:0;transform:translateY(8px) scale(.4)}18%{opacity:1;transform:translateY(-12px) scale(1.12)}55%{opacity:1;transform:translateY(-30px) scale(1)}100%{opacity:0;transform:translateY(-56px) scale(.9)}}';document.head.appendChild(s)}
-  const p=document.querySelector('.pitch');if(!p)return;
-  p.querySelectorAll('.statPop').forEach(e=>e.remove());
+  if(!document.getElementById('statPopCSS')){
+    const s=document.createElement('style');s.id='statPopCSS';
+    s.textContent='.statPop{position:fixed;z-index:9999;pointer-events:none;font:900 24px/1.1 "Kanit",sans-serif;white-space:nowrap;animation:statPopK 1.6s cubic-bezier(.2,1.2,.4,1) forwards;filter:drop-shadow(0 0 6px rgba(0,0,0,.65))}.statPop div{color:var(--pc,#4dff9a);text-shadow:0 0 10px var(--pc,#4dff9a),0 0 20px var(--pc,#4dff9a),0 2px 0 rgba(0,0,0,.75);display:flex;align-items:baseline;gap:3px}.statPop div small{font-size:13px;font-weight:800;opacity:.9}.statPop div+div{font-size:19px;margin-top:-2px;opacity:.92}@keyframes statPopK{0%{opacity:0;transform:translateY(8px) scale(.4)}12%{opacity:1;transform:translateY(-12px) scale(1.12)}60%{opacity:1;transform:translateY(-30px) scale(1)}100%{opacity:0;transform:translateY(-56px) scale(.9)}}';
+    document.head.appendChild(s);
+  }
+  document.querySelectorAll('.statPop').forEach(e=>e.remove());
   const C={fit:'#4dff9a',thin:'#3df2ff',stocky:'#ff8a3d'},LB={luk:'LUK',agi:'AGI',str:'STR'};
   const z=bodyClass(S.body.w),col=C[z]||'#4dff9a';
   let html='<div class="statPop" style="--pc:'+col+'">';
   if(hp>0)html+='<div>+'+hp+'<small>HP</small></div>';
   if(stK&&stV>0)html+='<div>+'+stV+'<small>'+LB[stK]+'</small></div>';
   html+='</div>';
-  p.insertAdjacentHTML('beforeend',html);
-  setTimeout(()=>{const e=p.querySelector('.statPop');if(e)e.remove()},1350);
-}
+  const p=document.querySelector('.pitch');
+  let L=innerWidth/2, T=innerHeight*0.34;
+  if(p){
+    const r=p.getBoundingClientRect();
+    L = r.left + r.width*0.22;
+    T = r.bottom - 210;
+  }
+  const tmp=document.createElement('div');
+  tmp.innerHTML=html;
+  const node=tmp.firstChild;
+  node.style.left=L+'px';
+  node.style.top =T+'px';
+  document.body.appendChild(node);
+  setTimeout(()=>{if(node.parentNode)node.parentNode.removeChild(node)},1800);
+  }
 function winClash(actKey,txt,sub,fx,opt){tutResult(true);passBurn();
  if(R&&R.__comboHit){txt='COMBO! '+txt;R.__comboHit=false;log('⛓ COMBO! โบนัส +'+(CFG.VARIETY_BONUS+CFG.COMBO_BONUS)+'% · เริ่มนับคอมโบ้ใหม่','gold')}
  const wasTutor=isPwdLesson();
@@ -10865,21 +10880,28 @@ function playMayaStepIn(kind,next){
  const w0=S.body.w, dW=thin?MG_FEED_KG:-MG_RUN_KG, mp0=S.mp||0, cost=thin?MG_FEED_COST:0, pay=Math.min(mp0,cost), loan=cost-pay;
  const RM=(typeof _evReduce==='function')&&_evReduce();
  const sfx=(n,a)=>{try{window.SFX&&window.SFX.play(n,a)}catch(e){}};
- const TX={
+const tr=s=>{
+  let txt=I18N.t(s);
+  if(I18N.lang==='en' && playerName()!=='กัมป์' && playerName()!=='Gump'){
+    txt=txt.replace(/Gump/g,playerName());
+  }
+  return PN(txt);
+};
+  const TX={
   n1:'กัมป์ผอมซูบจนลมพัดก็ปลิว… มายาเดินตรงเข้ามาพร้อมแท็บเล็ต',
   m1:'นายคิดว่าตัวเองเป็นเครื่องจักรเหรอไง?',
   g1:'โอ๊ย! ผมก็แค่…',
   m2:'อ้าปาก! กินให้หมด ห้ามบ่น!',
   g2:'อึ๊บ… ม่ำๆๆ',
-  j1:'เงินไม่พอเหรอ? เดี๋ยวฉันออกให้ก่อน — หักจากรางวัลด่านหน้านะ!',
+j1:'เงินไม่พอเหรอ? เดี๋ยวฉันออกให้ก่อน — หักจากรางวัลด่านหน้านะ!',
   m3:'ข้าวกล่องธรรมดา ไม่ได้เพิ่มพลังอะไรทั้งนั้น… แค่กันนายตาย',
   n2:'กัมป์หอบแฮกๆ ตัวหนักอึ้งจนก้าวไม่ออก… มายาเดินเข้ามาด้วยสีหน้านิ่งสนิท',
   m4:'ปุ่มหลบพังแล้วนะ!',
   g3:'โอ๊ยๆๆ ปล่อยหูผม!',
   m5:'วิ่ง! ตอนนี้เลย!',
   m6:'รอบนี้ฟรี… แต่คราวหน้ากินให้พอดีๆ'
- };
- const NAME={maya:'มายา',gump:'กัมป์',jo:'โจ'};
+};
+const NAME={maya:tr('มายา'),gump:tr('กัมป์'),jo:tr('โจ')};
  const im=(src,fb)=>`<img src="${src}" alt="" draggable="false" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><b class="fb">${fb}</b>`;
  const TAB='<svg viewBox="0 0 60 42" aria-hidden="true"><rect x="2" y="2" width="56" height="38" rx="5" fill="#2b2f45" stroke="#c9d2ff" stroke-width="2.5"/><rect x="7" y="7" width="46" height="28" rx="2" fill="#7fd0ff"/><rect x="11" y="12" width="26" height="3" fill="#fff"/><rect x="11" y="19" width="34" height="3" fill="#fff" opacity=".7"/><rect x="11" y="26" width="18" height="3" fill="#fff" opacity=".7"/></svg>';
  const sweat=[['26%','8%','0s'],['14%','16%','.35s'],['32%','20%','.7s']].map(a=>`<i class="mg-sweat" style="left:${a[0]};top:${a[1]};animation-delay:${a[2]}">💦</i>`).join('');
@@ -10890,14 +10912,14 @@ function playMayaStepIn(kind,next){
   <div class="mg-hud"><div class="mg-chip" id="mgW">⚖ ${w0.toFixed(2)} kg</div><div class="mg-chip" id="mgM">💰 ${baht(mp0)}</div><div class="mg-chip debt" id="mgD"><span>💸 หนี้</span> <b id="mgDv"></b></div></div>
   <div class="mg-stage" id="mgSt">
    <div class="mg-ch mg-g" id="mgG"><div class="mg-in">${thin?im('Gumptin.webp','😵'):im('Gumpbig.webp','😮‍💨')}</div>${thin?'':sweat}<i class="mg-ear">💢</i></div>
-   <div class="mg-ch mg-y" id="mgY"><div class="mg-in">${im('Maya12.webp','👩‍💼')}</div></div>
-   <div class="mg-ch mg-j" id="mgJ"><div class="mg-in">${im('Jo2.webp','😏')}</div></div>
-   <div class="mg-tab" id="mgT">${TAB}</div>
+<div class="mg-ch mg-y" id="mgY"><div class="mg-in" style="transform: scaleX(1) translateX(-40px) !important;">${im('Maya10.webp','👩‍💼')}</div></div>
+  <div class="mg-ch mg-j" id="mgJ"><div class="mg-in">${im('Jo2.webp','😏')}</div></div>
+   <div class="mg-tab" id="mgT" style="bottom: calc(32% + var(--ch)*.55);">${TAB}</div>
    <i class="mg-dust">💨</i>
    <div class="mg-fx" id="mgFx"></div>
   </div>
   <div class="mg-box" id="mgBox"><b class="mg-nm" id="mgNm"></b><div class="mg-tx" id="mgTx"></div><i class="mg-tap">แตะเพื่อไปต่อ ▶</i></div>
-  <div class="mg-skip" role="button" id="mgSk">ข้าม ⏭</div>
+<div class="mg-skip" role="button" id="mgSk">${tr('ข้าม ⏭')}</div>
   <div class="mg-res" id="mgRes"></div>
  </div>`);
  const ov=document.getElementById('mgOv'),$=id=>document.getElementById(id);
@@ -10909,10 +10931,10 @@ function playMayaStepIn(kind,next){
  const say=async(who,text,ms)=>{
   if(closed)return;
   const nm=$('mgNm');nm.textContent=who==='narr'?'📖':NAME[who];nm.className='mg-nm '+who;
-  $('mgTx').textContent=text;
+  $('mgTx').textContent=tr(text);           // ← เดิม: = text;
   sfx('voice',{k:who==='narr'?'sys':who,t:text});
   await wait(ms||Math.max(1900,1200+text.length*50));
- };
+};
  const pop=(txt,x,y)=>{const f=$('mgFx');if(!f)return;f.insertAdjacentHTML('beforeend',`<b class="mg-pop" style="left:${x};top:${y}">${txt}</b>`)};
  const em=(e,x,y)=>{const f=$('mgFx');if(!f)return;f.insertAdjacentHTML('beforeend',`<i class="mg-em" style="left:${x};top:${y}">${e}</i>`)};
  const shake=()=>{if(RM)return;const s=$('mgSt');s.classList.remove('shake');void s.offsetWidth;s.classList.add('shake')};
@@ -10933,21 +10955,21 @@ function playMayaStepIn(kind,next){
   window.__mgOn=false;
   try{next&&next()}catch(e){console.error(e)}
  };
- const showResult=()=>{
+const showResult=()=>{
   if(closed)return;
   const wEnd=S.body.w, d=wEnd-w0;
-  const rows=[`<div class="mg-row"><span>น้ำหนัก</span><b>${w0.toFixed(2)} → ${wEnd.toFixed(2)} kg <span class="${d>=0?'mg-up':'mg-dn'}">(${d>=0?'+':'−'}${Math.abs(d).toFixed(2)})</span></b></div>`];
-  if(thin)rows.push(`<div class="mg-row"><span>ค่าข้าว</span><b class="mg-dn">−${baht(pay)}</b></div>`);
-  else rows.push(`<div class="mg-row"><span>ค่าใช้จ่าย</span><b class="mg-up">ฟรี</b></div>`);
-  if(loan>0)rows.push(`<div class="mg-row"><span>โจให้ยืม</span><b class="mg-dn">${baht(loan)}</b></div>`);
-  $('mgRes').innerHTML=`<div class="mg-card"><h3>${thin?'กินข้าวแบบบังคับ':'วิ่งลดน้ำหนัก'}</h3>${rows.join('')}${loan>0?'<div class="mg-note">หักจากรางวัลด่านหน้า</div>':''}<div class="mg-note">ไม่ได้เข้าโรงอาหาร · ไม่ได้เพิ่มสเตตัส</div><div class="mg-btn" role="button" id="mgOk">ต่อไป ▶</div></div>`;
+  const rows=[`<div class="mg-row"><span>${tr('น้ำหนัก')}</span><b>${w0.toFixed(2)} → ${wEnd.toFixed(2)} kg <span class="${d>=0?'mg-up':'mg-dn'}">(${d>=0?'+':'−'}${Math.abs(d).toFixed(2)})</span></b></div>`];
+  if(thin)rows.push(`<div class="mg-row"><span>${tr('ค่าข้าว')}</span><b class="mg-dn">−${baht(pay)}</b></div>`);
+  else rows.push(`<div class="mg-row"><span>${tr('ค่าใช้จ่าย')}</span><b class="mg-up">${tr('ฟรี')}</b></div>`);
+  if(loan>0)rows.push(`<div class="mg-row"><span>${tr('โจให้ยืม')}</span><b class="mg-dn">${baht(loan)}</b></div>`);
+  $('mgRes').innerHTML=`<div class="mg-card"><h3>${tr(thin?'กินข้าวแบบบังคับ':'วิ่งลดน้ำหนัก')}</h3>${rows.join('')}${loan>0?'<div class="mg-note">'+tr('หักจากรางวัลด่านหน้า')+'</div>':''}<div class="mg-note">${tr('ไม่ได้เข้าโรงอาหาร · ไม่ได้เพิ่มสเตตัส')}</div><div class="mg-btn" role="button" id="mgOk">${tr('ต่อไป ▶')}</div></div>`;
   $('mgRes').classList.add('on');
   $('mgBox').style.display='none';$('mgSk').style.display='none';
   sfx(thin?'confirm':'heal');
- };
+};
  ov.addEventListener('click',e=>{
   if(e.target.closest('#mgOk')){close();return}
-  if(e.target.closest('#mgSk')){apply();close();try{log('👩‍💼 มายาจัดการ · น้ำหนัก '+S.body.w.toFixed(2)+' kg','info')}catch(_){}return}
+  if(e.target.closest('#mgSk')){apply();close();try{log(tr('👩‍💼 มายาจัดการ')+' · '+tr('น้ำหนัก')+' '+S.body.w.toFixed(2)+' kg','info')}catch(_){}}return
   if(adv)adv();
  });
  /* ---------- ไทม์ไลน์ ---------- */
@@ -10988,7 +11010,7 @@ function playMayaStepIn(kind,next){
     await say('narr',TX.n2);
     ov.classList.add('inY');
     await pause(700);
-    ov.classList.add('near');sfx('deny');shake();{const h=gHead();pop('ตึง!',(h.x+10)+'px',(h.y-40)+'px')}
+    ov.classList.add('near');sfx('deny');shake();{const h=gHead();pop('ดึง!',(h.x+10)+'px',(h.y-40)+'px')}
     await say('maya',TX.m4,1700);
     await say('gump',TX.g3,1500);
     await say('maya',TX.m5,1300);
@@ -12881,6 +12903,9 @@ html body .s8-box .nm,html body .s9-box .nm,html body .s10-box .nm{position:abso
 .c12-bubble-coach::before{content:'โค้ชวิค';background:#ff334b}
 .c12-bubble-maya::before{content:'มายา';background:#ff8ad8}
 .c12-bubble-gum::before{content:var(--pn,'กัมป์');background:#3df2ff}
+html[lang="en"] .ca-bubble-gum::before,html[lang="en"] .c12-bubble-gum::before{content:var(--pn,'Gump')}
+html[lang="en"] .ca-bubble-maya::before,html[lang="en"] .c12-bubble-maya::before{content:'Maya'}
+html[lang="en"] .c12-bubble-coach::before{content:'Coach Vik'}
 .ca-field,.c12-field-box,.ca-coach-bubble{clip-path:none;border-radius:14px;background:rgba(12,10,22,.94);box-shadow:0 8px 22px rgba(0,0,0,.6)}
 .ca-field,.c12-field-box{border:1.5px solid #ff9a3d}
 .ca-coach-bubble{border:1.5px solid #ff334b}
@@ -13300,7 +13325,7 @@ j('พวกนาย... บ้าพอกันทั้งคู่เลย�
     
     { scene: { bg: BG, dark: true, clear: true, set: { maya: C('maya', 50, 50) } } },
     { dir: 'สนามทดสอบ · แสงไฟเริ่มดับ · มายายืนคนเดียว' },
-    { dir: 'ภาพโคลสอัพ: หน้าจอแท็บเล็ต', tab: { lines: ['TARGET: GUMP', 'KINETIC ASSESSMENT 100% COMPLETE'] } },
+    { dir: 'ภาพโคลสอัพ: หน้าจอแท็บเล็ต', tab: { lines: ['TARGET: ' + I18N.t(PN('กัมป์')).toUpperCase(), 'KINETIC ASSESSMENT 100% COMPLETE'] }},
     th('(กัมป์... ขอบใจนะ)'), th('(ที่ทำให้ฉัน...)'), th('(ได้รู้ว่าการมีชีวิต... มันเป็นยังไง)'),
     { dir: 'มายากดลบไฟล์', fx: 'glitch' },
     { dir: 'ตัวหนังสือเปลี่ยนเป็นสีแดง · เสียงคลื่นสัญญาณแทรกในหูฟัง', tab: { red: true, lines: ['SYSTEM OVERRIDE...', 'DATA: PARTIALLY CORRUPTED'] }, fx: 'static' },
@@ -13970,7 +13995,7 @@ j('พวกนาย... บ้าพอกันทั้งคู่เลย�
       T(500 + D - 900, () => { pop(foot, 'flash', 160); });
       T(500 + D - 500, () => { foot.classList.add('brk'); noise(.1, .6); });
       T(500 + D + 500, () => { foot.classList.remove('on'); if (vid) vid.pause(); });
-      T(500 + D + 1700, () => typeLines(['ARCHIVE FOOTAGE: UNKNOWN', 'SUBJECT: GUMP', 'DATA: PARTIALLY CORRUPTED'], false, 3300));
+     T(500 + D + 1700, () => typeLines(['ARCHIVE FOOTAGE: UNKNOWN', 'SUBJECT: ' + I18N.t(PN('กัมป์')).toUpperCase(), 'DATA: PARTIALLY CORRUPTED'], false, 3300));
       T(500 + D + 6100, creditsRoll);
     }
     function creditsRoll() {
@@ -14950,6 +14975,19 @@ I18N.addFrag({"⚽ Solo Football สุดแหวก! ไม่มีปุ่
 <script>
 /* คำแปลอังกฤษของซีน มายาจัดการ */
 I18N.addFrag({"กัมป์ผอมซูบจนลมพัดก็ปลิว… มายาเดินตรงเข้ามาพร้อมแท็บเล็ต":"Gump is so thin a breeze could blow him away... Maya walks straight over with her tablet","นายคิดว่าตัวเองเป็นเครื่องจักรเหรอไง?":"You think you're a machine or something?","โอ๊ย! ผมก็แค่…":"Ow! I was just...","อ้าปาก! กินให้หมด ห้ามบ่น!":"Open wide! Eat it all, no complaining!","อึ๊บ… ม่ำๆๆ":"Mmph... nom nom nom...","เงินไม่พอเหรอ? เดี๋ยวฉันออกให้ก่อน — หักจากรางวัลด่านหน้านะ!":"Not enough money? I'll cover it for now — it comes out of the next stage's prize!","ข้าวกล่องธรรมดา ไม่ได้เพิ่มพลังอะไรทั้งนั้น… แค่กันนายตาย":"Plain boxed rice. It gives you no extra power at all... it just keeps you alive","กัมป์หอบแฮกๆ ตัวหนักอึ้งจนก้าวไม่ออก… มายาเดินเข้ามาด้วยสีหน้านิ่งสนิท":"Gump pants heavily, too heavy to take a step... Maya walks over with a perfectly blank face","ปุ่มหลบพังแล้วนะ!":"The dodge button is broken, you know!","โอ๊ยๆๆ ปล่อยหูผม!":"Ow ow ow! Let go of my ear!","วิ่ง! ตอนนี้เลย!":"Run! Right now!","รอบนี้ฟรี… แต่คราวหน้ากินให้พอดีๆ":"This one is free... but next time eat sensibly","โป๊ก!":"BONK!","ตึง!":"YANK!","ม่ำ!":"NOM!","น้ำหนัก":"Weight","ค่าข้าว":"Meal cost","ค่าใช้จ่าย":"Cost","โจให้ยืม":"Jo lent","หักจากรางวัลด่านหน้า":"deducted from the next stage prize","ไม่ได้เข้าโรงอาหาร · ไม่ได้เพิ่มสเตตัส":"No cafeteria visit · no stat bonus","กินข้าวแบบบังคับ":"Forced Feeding","วิ่งลดน้ำหนัก":"Weight-Loss Run","💸 หนี้":"💸 Debt"});
+</script>
+<script>
+/* English fixes (leaks, glued words, grammar) — later keys override earlier ones */
+I18N.addFrag({"บันทึกเซฟ (SAVE)": "Save Game", "โหลดเซฟ (LOAD)": "Load Game", "💾 โค้ดเซฟของคุณ": "💾 Your Save Code", "📋 คัดลอกโค้ด": "📋 Copy Code", "ความยาวโค้ด": "Code length", "ตัวอักษร": "characters", "✅ คัดลอกแล้ว! เอาไปวางเก็บไว้ได้เลย": "✅ Copied! Paste it somewhere safe.", "คัดลอกอัตโนมัติไม่ได้ — กดค้างในช่องแล้วเลือกคัดลอกเอง": "Couldn't copy automatically — long-press the box and choose Copy yourself.", "โค้ดไม่ถูกต้อง หรือโค้ดไม่ครบ (ถูกตัดตอนวาง) ลองใหม่อีกทีนะครับ": "Invalid or incomplete code (it may have been cut off when pasting). Please try again.", "มายาจัดการ": "Maya steps in", "ดึง!": "YANK!", "ตึง!": "Thud!", "ฉันไม่รู้ว่าควรบอก": "I don't know whether I should tell ", "ไหม": " or not", "มอง": "Looks at ", "แวบ 1 วิ": " for 1 second", "เชียร์": "Cheering ", "อยู่ข้างสนาม!": " on from the sideline!", "เชียร์อยู่ข้างสนาม!": "Cheering from the sideline!", "🏆 ตู้เกียรติยศของ": "🏆 Trophy Cabinet of ", "ยืนกลางสนาม ลมพัดชายเสื้อปลิว เงยหน้ามองท้องฟ้ายามค่ำคืนที่เต็มไปด้วยแสงแฟลช แล้วกำหมัดแน่นยกขึ้นสุดแขน": " stands in the middle of the pitch, the wind tugging at his shirt. He looks up at the night sky full of camera flashes, then clenches a fist and raises it high", "กระเด็นถอยหลัง!": " is knocked backward!", "แต่บอลก็ยังจำจังหวะของ": "But the ball still remembers ", "ได้": "'s rhythm.", " เดี๋ยวก่อนนะ ก่อนลงสนามมีเรื่องจะบอก": ", wait a moment — I have something to tell you before you go out there", "ชนะแล้วนะ ": "You won, ", " เก่งมากเลย!": "! Great job!", "แต้มที่คุณอัปเองกลับมาแจกใหม่?": "points you spent yourself so you can redistribute them?", "คืนแต้มที่กด": "Refunds points spent with", "เงินไม่พอซื้อ": "Not enough money to buy", "🌟 เปิดใช้งาน": "🌟 Activated", "🌙 ปิดไอเทมลับทั้งหมด": "🌙 All secret items turned off", "🍽 กิน": "🍽 Ate", "40) ร่างกายไม่ดูดซึม Stat!": "40): your body can't absorb stats!", "+ อีก": "+", "แทคติกที่เก่งขึ้น (ดูป้าย ▲ ใหม่ ตอนเลือกแผน)": "more tactics improved (see the ▲ New badge when choosing a plan)", "ลดสเตตสูงสุด -4 · แต่ +": "Highest stat -4 · but +", " ทุกสเตตที่เหลือ": " to all other stats", "สับขาหลอก: ลด ": "Fake Chop: ", " ที่เหลือ": " to the rest", "สุ่มแจก": "Randomly distributes", "แต้มลง Str/Agi/Dex/Luk · สุ่ม 1 ตัว -8 (ไม่แตะ Vit)": "points among Str/Agi/Dex/Luk · 1 random stat -8 (Vit unaffected)", "รีดน้ำหนักทิ้ง 3kg ทันที แลกกับการฮีลเลือด": "Instantly shed 3 kg to restore", "% และ LUK +": "% HP and LUK +", "⚖ รีดน้ำหนัก 3kg ทันที (เหลือ": "⚖ Instantly shed 3 kg (now", "(ชิ้นที่ ": "(item #", "ชิ้นที่ ": "Item #", " เลือก ": ", pick ", "🛡 โล่กำบังรับไว้! ดาเมจ 0 (เหลือ": "🛡 Shield absorbed it! Damage 0 (remaining:", "🛡 โล่กำบังรับไว้! กองหลังพุ่งชนแต่ดาเมจ 0 (เหลือ": "🛡 Shield absorbed it! The defender charged, but damage was 0 (remaining:", "HP → เหลือ": "HP → now", "HP (ยิงไม่เข้าก็ต้องเจ็บ) → เหลือ": "HP (a missed shot still hurts) → now", "→ เหลือ": "→ now"});
+try{window.addEventListener('langchange',function(){try{pnSync()}catch(e){}});pnSync()}catch(e){}
+/* แก้ไขคำแปลที่หลุดสำหรับชื่อผู้เล่นที่กำหนดเอง */
+I18N.addFrag({
+"หมูกะทะ":"Moo Kratha BBQ",
+"ส้มตำ":"Som Tam",
+"🥘 ผัดไทย":"🥘 Pad Thai",
+  "คุ้มไปเลย": "worth it ",
+  "กินให้คุ้มไปเลย": "Eat to your heart's content, "
+});
 </script>
 </body>
 </html>
