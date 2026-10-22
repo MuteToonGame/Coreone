@@ -2506,6 +2506,24 @@ const ZC_MS=850;
 
 // ===== ระบบแคลอรี่จริง: 7,000 kcal = 1 kg =====
 const KCAL_PER_KG=7000;
+  /* ── น้ำหนักตัว: ต่ำสุด 45 กก. · สูงสุดไม่จำกัด ──
+   ใช้ getter/setter บน S.body.w → ดักทุกการเขียนอัตโนมัติ ไม่ต้องแก้จุดอื่น */
+const BODY_W_MIN = 45;
+function hookBodyW(){
+  if(!S || !S.body) return;
+  if(S.body.__hooked) return;
+  let v = Math.max(BODY_W_MIN, +S.body.w || 70);
+  try{
+    Object.defineProperty(S.body, 'w', {
+      configurable: true,
+      enumerable: true,
+      get(){ return v; },
+      set(nv){ v = Math.max(BODY_W_MIN, +nv || 0); }
+    });
+    S.body.__hooked = true;
+  }catch(e){}
+}
+
 const ACT_KCAL={DRB:100, TEC:120, PWD:150, HLS:200, SKIP:0};          // เผาทุกครั้งที่กดท่า (ผ่านหรือไม่ผ่าน)
 const BASE_BURN=[200,210,220,230,240,250,260,270,280,290];            // เผาตอนผ่านกองหลังตัวที่ 1-10
 const BASE_BURN_GK=300;                                               // ผ่าน GK / เป้าหมายตัวที่ 11 ขึ้นไป (ด่าน 11)
@@ -4857,7 +4875,7 @@ if(typeof S.diet.hp!=='number')S.diet.hp=0;
  if(S.saveVersion<3){
    if(S.st&&S.st.vit>=30)S.st.vit=1;
    S.saveVersion=3;
- }}
+ }hookBodyW();}
 function save(){MEM=JSON.parse(JSON.stringify(S));try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}});
 window.addEventListener('pagehide',()=>{if(S)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}});
@@ -8684,6 +8702,55 @@ ${(showFoe&&!R.enterFoe)?`<div class="nameplate">${STAGES[R.stage].f} ${e.nm?e.n
  ${(sc==='travel'||sc==='run')?'<div class="hint">แตะเพื่อข้ามฉาก ▶</div>':R.bubTalk?'<div class="hint">แตะเพื่อไปต่อ ▶</div>':''}</div>`}
 
 function tcyTap(){try{showToast('🟠STR ชนะ 🔵AGI → 🔵AGI ชนะ 🟣TEC → 🟣TEC ชนะ 🟠STR\n💪อัด › สายเร็ว · 💨หลบ › สายเทคนิค · 💥ซีโร่ › สายพลัง','gold')}catch(e){}}
+  /* ═══ เควส: กดดูรายละเอียดได้ในหน้าต่อสู้ ═══ */
+function questInfoCSS(){
+  if(document.getElementById('qiCss'))return;
+  const st=document.createElement('style');st.id='qiCss';
+  st.textContent=
+   '.quest-pill{cursor:pointer;transition:transform .12s,background .12s;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}'+
+   '.quest-pill:active{transform:scale(.94);background:rgba(255,213,74,.28);border-color:#ffd54a}'+
+   '.quest-pill .qi-info{opacity:.7;font-weight:900;margin-left:2px}'+
+   '.quest-info-ov{position:fixed;inset:0;z-index:2147482000;display:flex;align-items:center;justify-content:center;padding:18px;'+
+     'background:rgba(3,4,14,.78);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:qiFade .18s ease-out}'+
+   '.qi-box{width:100%;max-width:340px;padding:16px;border-radius:16px;'+
+     'background:linear-gradient(165deg,rgba(24,28,52,.98),rgba(8,10,24,.99));'+
+     'border:1.5px solid rgba(255,213,74,.55);'+
+     'box-shadow:0 0 24px rgba(255,213,74,.25),0 16px 40px rgba(0,0,0,.65);'+
+     'color:#eaf6f0;font-family:Kanit,Rajdhani,"Noto Sans Thai",sans-serif;'+
+     'animation:qiPop .22s cubic-bezier(.2,1.2,.4,1)}'+
+   '.qi-head{font-size:19px;font-weight:900;color:#ffd54a;margin-bottom:6px;line-height:1.3;text-shadow:0 2px 0 rgba(0,0,0,.5)}'+
+   '.qi-desc{font-size:14px;line-height:1.55;color:#dfe8f5;margin-bottom:10px}'+
+   '.qi-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:7px 0;border-top:1px solid rgba(255,255,255,.1)}'+
+   '.qi-row span{opacity:.8}.qi-row b{text-align:right}'+
+   '.qi-close{width:100%;margin-top:12px;padding:11px;border-radius:10px;font-family:inherit;font-size:15px;font-weight:800;'+
+     'color:#231900;background:linear-gradient(160deg,#ffe58a,#ffd54a 55%,#e0a600);border:none;cursor:pointer;'+
+     'box-shadow:0 3px 0 rgba(0,0,0,.4)}'+
+   '@keyframes qiFade{from{opacity:0}to{opacity:1}}'+
+   '@keyframes qiPop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}';
+  document.head.appendChild(st);
+  try{I18N.addFrag({'สถานะ':'Status','รางวัล':'Reward','สำเร็จแล้ว':'Completed','ยังไม่สำเร็จ':'Not yet'})}catch(e){}
+}
+
+function showQuestInfo(i){
+  const q=(R&&R.quests&&R.quests[i]);if(!q)return;
+  questInfoCSS();
+  const done=!!q.chk(R);
+  document.querySelectorAll('.quest-info-ov').forEach(e=>e.remove());
+  const ov=document.createElement('div');ov.className='quest-info-ov';
+  ov.innerHTML='<div class="qi-box">'
+   +'<div class="qi-head">'+(done?'✅ ':'⏳ ')+PN(q.n)+'</div>'
+   +'<div class="qi-desc">'+PN(q.d)+'</div>'
+   +'<div class="qi-row"><span>สถานะ</span><b style="color:'+(done?'#3dffa0':'#ffd54a')+'">'+(done?'สำเร็จแล้ว':'ยังไม่สำเร็จ')+'</b></div>'
+   +'<div class="qi-row"><span>รางวัล</span><b class="gold">+'+q.exp+' EXP · +'+baht(q.mp)+'</b></div>'
+   +'<button class="qi-close" type="button">ปิด</button>'
+   +'</div>';
+  ov.addEventListener('click',function(e){
+    if(e.target===ov||e.target.closest('.qi-close'))ov.remove();
+  });
+  document.body.appendChild(ov);
+  try{if(window.SFX)SFX.play('open')}catch(e){}
+}
+window.showQuestInfo=showQuestInfo;
 function scrBattle(){spdEnsureLoop();
  if(!R)return;
  const _mx=maxHp(); if(R.hp>_mx)R.hp=_mx;
@@ -8783,8 +8850,8 @@ ${mcheerHTML()}
  ${extraInfo?`<div style="position:relative;height:0;z-index:30;pointer-events:none"><div class="small" style="position:absolute;left:6px;right:6px;top:212px;padding:7px 11px;border-radius:12px;background:rgba(8,10,22,.82);border:1px solid rgba(255,255,255,.18);line-height:1.5">${extraInfo}</div></div>`:''}
  ${pitchHTML(e)}
  ${fighting?`<div class="card stage-ui acts-compact" style="padding:9px 12px 7px">
- ${R.quests&&R.quests.length&&!tutHide()?`<div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:7px">${R.quests.map(q=>`<span class="pill" style="font-size:10px">${q.chk(R)?'✅':'⏳'} ${q.n}</span>`).join('')}</div>`:''}
- ${(()=>{const lz=zeroLessonOn(),one=lz?'':oneOneJoBtn(e),phn=lz?'':heelSpinBtn(e),
+${R.quests&&R.quests.length&&!tutHide()?`<div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:7px">${R.quests.map((q,i)=>`<span class="pill quest-pill" role="button" tabindex="0" style="font-size:10px" onclick="event.stopPropagation();showQuestInfo(${i})">${q.chk(R)?'✅':'⏳'} ${q.n} <span class="qi-info">ⓘ</span></span>`).join('')}</div>`:''}
+  ${(()=>{const lz=zeroLessonOn(),one=lz?'':oneOneJoBtn(e),phn=lz?'':heelSpinBtn(e),
  skip=(R.skip>0&&!isPwdLesson()&&!lz&&!R.phReady&&!R.phSeal)?'<button data-k="SKIP" class="btn-y act" onclick="useSkip()"><span class="ab-h"><span class="ab-ic">⚡</span><b class="ab-n">ใช้สิทธิ์ข้ามฟรี</b></span><span class="small ab-d">ผ่านทันที</span></button>':'';
  let top,bot;
  if(actsArr.length===3){ if(compact){top=actsArr;bot=[one,phn]} else {top=actsArr.slice(0,2);bot=[actsArr[2],one,phn]} }
@@ -8792,8 +8859,8 @@ ${mcheerHTML()}
  const row=(a,c)=>{a=a.filter(Boolean);return a.length?`<div class="row ract${c?' '+c:''}" style="--n:${a.length}">${a.join('')}</div>`:''};
  return row(top,compact?'nodesc':'')+row(bot)+row([skip])})()}</div>`
  :`<div class="card stage-ui" style="text-align:center;padding:10px">
- ${R.quests&&R.quests.length&&!tutHide()?`<div class="row" style="gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:6px">${R.quests.map(q=>`<span class="pill" style="font-size:10px">${q.chk(R)?'✅':'⏳'} ${q.n}</span>`).join('')}</div>`:''}
- <b class="small">${R.scene==='travel'?'🏃 กำลังพาบอลบุกขึ้นหน้า...':R.scene==='run'?'⚡ กองหลังพุ่งเข้าสกัด!':'...'}</b></div>`}`);
+${R.quests&&R.quests.length&&!tutHide()?`<div class="row" style="gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:6px">${R.quests.map((q,i)=>`<span class="pill quest-pill" role="button" tabindex="0" style="font-size:10px" onclick="event.stopPropagation();showQuestInfo(${i})">${q.chk(R)?'✅':'⏳'} ${q.n} <span class="qi-info">ⓘ</span></span>`).join('')}</div>`:''}
+  <b class="small">${R.scene==='travel'?'🏃 กำลังพาบอลบุกขึ้นหน้า...':R.scene==='run'?'⚡ กองหลังพุ่งเข้าสกัด!':'...'}</b></div>`}`);
  updateStageBg();
  fitBuffRow();fitActBtns();
  oneOneOverlaySync(); tutCheck();
