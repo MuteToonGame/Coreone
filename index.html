@@ -10725,13 +10725,13 @@ function mgCss(){
  st.textContent=`
 #mgOv{position:fixed;inset:0;z-index:99990;overflow:hidden;color:#fff;touch-action:manipulation;user-select:none;-webkit-user-select:none;--ch:min(38vh,64vw,320px);--fx:1}
 #mgOv *{box-sizing:border-box}
-#mgOv .mg-bg{position:absolute;inset:0}
-#mgOv.thin .mg-bg{background:radial-gradient(120% 80% at 50% 0%,#5a3d6e 0%,#241733 55%,#0f0a1a 100%)}
-#mgOv.fat .mg-bg{background:linear-gradient(#ffb36b 0%,#ff7a85 36%,#5a3d8a 62%,#2a2150 100%)}
-#mgOv .mg-floor{position:absolute;left:0;right:0;bottom:0;height:30%;overflow:hidden}
-#mgOv.thin .mg-floor{background:linear-gradient(#3a2d55,#1b1430)}
-#mgOv.fat .mg-floor{background:linear-gradient(#c0584c,#7d2f3f)}
-#mgOv.fat .mg-floor::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.38) 0 6px,transparent 6px 90px);background-size:90px 100%;animation:mgScroll .42s linear infinite;animation-play-state:paused}
+#mgOv .mg-bg {
+    position: absolute; inset: 0;
+    background: url('fill.webp') center/cover no-repeat !important;
+}
+#mgOv .mg-floor, #mgOv .mg-floor::before, #mgOv .mg-floor::after { display: none !important; }
+#mgOv.thin .mg-floor, #mgOv.fat .mg-floor { display: none !important; }
+
 #mgOv.fat.run .mg-floor::before{animation-play-state:running}
 #mgOv.fat .mg-floor::after{content:"";position:absolute;left:0;right:0;top:34%;height:4px;background:rgba(255,255,255,.55)}
 @keyframes mgScroll{to{background-position:-90px 0}}
