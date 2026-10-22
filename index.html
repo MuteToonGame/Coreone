@@ -168,11 +168,11 @@ body[class*="stagebg-caf"] .card{background:rgba(12,8,18,.74)!important;backdrop
   linear-gradient(150deg,rgba(var(--rgb),.36),rgba(var(--rgb),.10) 62%,rgba(8,4,16,.5)),
   linear-gradient(160deg,#241338,#0c0716);
  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -3px 0 rgba(0,0,0,.4),inset 3px 0 0 var(--ac)}
-.acts-compact .act .ab-h{display:flex;align-items:center;gap:.42em;min-width:0}
+.acts-compact .act .ab-h{display:flex;flex-wrap:wrap;align-items:center;gap:1px .42em;min-width:0}
 .acts-compact .act .ab-ic{flex:none;width:1.55em;height:1.55em;display:flex;align-items:center;justify-content:center;
  font-size:.95em;line-height:1;border-radius:.45em;background:rgba(var(--rgb),.24);border:1px solid rgba(var(--rgb),.65);
  box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
-.acts-compact .act .ab-n{flex:1 1 auto;min-width:0;font-size:1em;font-weight:800;line-height:1.2;overflow-wrap:anywhere}
+.acts-compact .act .ab-n{flex:1 1 auto;min-width:0;font-size:1em;font-weight:800;line-height:1.2;overflow-wrap:break-word;word-break:normal}
 .acts-compact .act .ab-h .ok,.acts-compact .act .ab-h .bad{flex:none;font-size:.68em;font-weight:700;line-height:1.2;white-space:nowrap;
  padding:.1em .5em;border-radius:99px;background:rgba(0,0,0,.42);border:1px solid currentColor}
 .acts-compact .act .ab-d{display:block;font-size:.8em;font-weight:500;line-height:1.3;opacity:.85;overflow-wrap:anywhere}
@@ -8881,7 +8881,7 @@ function fitActBtns(){
   let fs=13;b.style.setProperty('--afs',fs+'px');
   const ln=el=>{const lh=parseFloat(getComputedStyle(el).lineHeight)||fs*1.3;return Math.max(1,Math.round(el.offsetHeight/lh))};
   const total=()=>ln(n)+((d&&d.textContent.trim())?ln(d):0);
-  while(total()>3&&fs>7.5){fs-=.5;b.style.setProperty('--afs',fs+'px')}
+  const over=()=>total()>3||b.scrollHeight>b.clientHeight+1;while(over()&&fs>7.5){fs-=.5;b.style.setProperty('--afs',fs+'px')}
   if(total()>3){b.classList.add('ab-cut');b.style.setProperty('--cl',Math.max(1,3-ln(n)))}
  })}
 {let _fabT;window.addEventListener('resize',()=>{clearTimeout(_fabT);_fabT=setTimeout(()=>{try{fitActBtns()}catch(e){}},120)})}
@@ -14856,6 +14856,7 @@ setInterval(() => {
     if (lang === 'en') {
       arr.forEach(function (n) { if (n.isConnected) apply(n); });
       arrA.forEach(function (n) { if (n.isConnected) doAttrs(n); });
+      try { if (typeof fitActBtns === 'function') fitActBtns(); if (typeof fitBuffRow === 'function') fitBuffRow(); } catch (e) {}
     }
     if (mo) mo.takeRecords();
   }
@@ -15002,6 +15003,7 @@ setInterval(() => {
     try { localStorage.setItem(LKEY, l); } catch (e) {}
     document.documentElement.lang = l;
     if (l === 'en') apply(document.body); else undo(document.body);
+    try { if (typeof fitActBtns === 'function') fitActBtns(); if (typeof fitBuffRow === 'function') fitBuffRow(); } catch (e) {}
     if (mo) mo.takeRecords();
     if (gear) { var g = UI[l].title; gear.title = g; gear.setAttribute('aria-label', g); }
     if (ov && ov.classList.contains('on')) buildModal();
