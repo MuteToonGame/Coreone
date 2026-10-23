@@ -2179,6 +2179,59 @@ button.foe-action.el-locked{filter:none;font-size:20px}
 @keyframes gcoinRM{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.gcoin{animation:gcoinRM 1.2s ease-out both!important}.ev-card,.ev-card-in{transition:none;animation:none!important}.event-box,.event-box *,.event-scene,.bf-card,.bf-ico{animation:none!important}.event-choice,.bf-item{transition:none}}
 </style>
+<style>
+/* ===== Custom Grid (4 คอลัมน์) ===== */
+.acts-grid-custom {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+.acts-grid-custom > div {
+  display: flex;
+}
+.acts-grid-custom .act {
+  width: 100%;
+  height: 60px !important;
+  padding: 4px 4px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+.acts-grid-custom .act .ab-h {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
+  width: 100%;
+}
+.acts-grid-custom .act .ab-n {
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+.acts-grid-custom .act .ab-d {
+  font-size: 11px;
+  font-weight: bold;
+  opacity: 0.9;
+  line-height: 1.1;
+  margin-top: 0;
+}
+
+/* ปรับปุ่ม วันวัน / แพนท่อม ให้เล็กลงนิดนึงเพื่อไม่ให้ล้น */
+.acts-grid-custom .act[data-k="ONE"] .ab-n,
+.acts-grid-custom .act[data-k="PHN"] .ab-n {
+  font-size: 12px;
+}
+.acts-grid-custom .act[data-k="ONE"] .ab-d,
+.acts-grid-custom .act[data-k="PHN"] .ab-d {
+  font-size: 10px;
+  }
+</style>
 </head>
 <body>  
 <div id="app"></div>
@@ -8878,15 +8931,40 @@ ${mcheerHTML()}
   </div>
  ${extraInfo?`<div style="position:relative;height:0;z-index:30;pointer-events:none"><div class="small" style="position:absolute;left:6px;right:6px;top:212px;padding:7px 11px;border-radius:12px;background:rgba(8,10,22,.82);border:1px solid rgba(255,255,255,.18);line-height:1.5">${extraInfo}</div></div>`:''}
  ${pitchHTML(e)}
- ${fighting?`<div class="card stage-ui acts-compact" style="padding:9px 12px 7px">
-${R.quests&&R.quests.length&&!tutHide()?`<div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:7px">${R.quests.map((q,i)=>`<span class="pill quest-pill" role="button" tabindex="0" style="font-size:10px" onclick="event.stopPropagation();showQuestInfo(${i})">${q.chk(R)?'✅':'⏳'} ${q.n} <span class="qi-info">ⓘ</span></span>`).join('')}</div>`:''}
-  ${(()=>{const lz=zeroLessonOn(),one=lz?'':oneOneJoBtn(e),phn=lz?'':heelSpinBtn(e),
- skip=(R.skip>0&&!isPwdLesson()&&!lz&&!R.phReady&&!R.phSeal)?'<button data-k="SKIP" class="btn-y act" onclick="useSkip()"><span class="ab-h"><span class="ab-ic">⚡</span><b class="ab-n">ใช้สิทธิ์ข้ามฟรี</b></span><span class="small ab-d">ผ่านทันที</span></button>':'';
- let top,bot;
- if(actsArr.length===3){ if(compact){top=actsArr;bot=[one,phn]} else {top=actsArr.slice(0,2);bot=[actsArr[2],one,phn]} }
- else {top=actsArr;bot=[one,phn]}
- const row=(a,c)=>{a=a.filter(Boolean);return a.length?`<div class="row ract${c?' '+c:''}" style="--n:${a.length}">${a.join('')}</div>`:''};
- return row(top,compact?'nodesc':'')+row(bot)+row([skip])})()}</div>`
+${fighting?`<div class="card stage-ui acts-compact" style="padding:9px 12px 7px">
+ ${R.quests&&R.quests.length&&!tutHide()?`<div class="row" style="gap:5px;flex-wrap:wrap;margin-bottom:7px">${R.quests.map((q,i)=>`<span class="pill quest-pill" role="button" tabindex="0" style="font-size:10px" onclick="event.stopPropagation();showQuestInfo(${i})">${q.chk(R)?'✅':'⏳'} ${q.n} <span class="qi-info">ⓘ</span></span>`).join('')}</div>`:''}
+ ${(()=>{
+   const lz=zeroLessonOn(),one=lz?'':oneOneJoBtn(e),phn=lz?'':heelSpinBtn(e),
+   skip=(R.skip>0&&!isPwdLesson()&&!lz&&!R.phReady&&!R.phSeal)?'<button data-k="SKIP" class="btn-y act" onclick="useSkip()" style="grid-column:span 4;height:40px!important;flex-direction:row;gap:8px"><span class="ab-h" style="margin:0"><span class="ab-n" style="font-size:12px">ใช้สิทธิ์ข้ามฟรี</span></span><span class="ab-d" style="margin:0">ผ่านทันที</span></button>':'';
+   
+   let gridHTML = '';
+
+// แถว 1: หลบ (span 2) / อัด (span 2)
+if (actsArr.length >= 2) {
+  gridHTML += `<div style="grid-column:span 2">${actsArr[0]}</div>`; 
+  gridHTML += `<div style="grid-column:span 2">${actsArr[1]}</div>`; 
+} else {
+  actsArr.forEach(a => { gridHTML += `<div style="grid-column:span ${actsArr.length===2?2:4}">${a}</div>`; });
+}
+
+// แถว 2: ซีโร่ (span 2) / วันวัน (span 1) / แพนท่อม (span 1)
+if (actsArr.length >= 3) {
+  if (one && phn) {
+    gridHTML += `<div style="grid-column:span 2">${actsArr[2]}</div>`;
+    gridHTML += `<div style="grid-column:span 1">${one}</div>`;
+    gridHTML += `<div style="grid-column:span 1">${phn}</div>`;
+  } else if (one) {
+    gridHTML += `<div style="grid-column:span 2">${actsArr[2]}</div>`;
+    gridHTML += `<div style="grid-column:span 2">${one}</div>`;
+  } else if (phn) {
+    gridHTML += `<div style="grid-column:span 2">${actsArr[2]}</div>`;
+    gridHTML += `<div style="grid-column:span 2">${phn}</div>`;
+  } else {
+    gridHTML += `<div style="grid-column:span 4">${actsArr[2]}</div>`;
+  }
+  }
+return `<div class="acts-grid-custom">${gridHTML}${skip}</div>`;
+ })()}</div>`
  :`<div class="card stage-ui" style="text-align:center;padding:10px">
 ${R.quests&&R.quests.length&&!tutHide()?`<div class="row" style="gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:6px">${R.quests.map((q,i)=>`<span class="pill quest-pill" role="button" tabindex="0" style="font-size:10px" onclick="event.stopPropagation();showQuestInfo(${i})">${q.chk(R)?'✅':'⏳'} ${q.n} <span class="qi-info">ⓘ</span></span>`).join('')}</div>`:''}
   <b class="small">${R.scene==='travel'?'🏃 กำลังพาบอลบุกขึ้นหน้า...':R.scene==='run'?'⚡ กองหลังพุ่งเข้าสกัด!':'...'}</b></div>`}`);
@@ -8928,16 +9006,6 @@ function damageByCard(amount) { R.hp = Math.max(1, R.hp - amount); }
 
 const heelUnlocked=()=>!!(S.story&&S.story.phantomUnlocked);
 
-function heelSpinBtn(e){
- if(R.phUsed)return `<button data-k="PHN" class="btn-r act" disabled><span class="ab-h"><span class="ab-ic">🩹</span><b class="ab-n">เจ็บขา</b></span><span class="small ab-d">ใช้ไม่ได้แล้ว</span></button>`;
- if(R.phReady)return `<button data-k="PHN" class="btn-r act ph-btn" onclick="phantomCut()"><span class="ab-h"><span class="ab-ic">🌀</span><b class="ab-n">PHANTOM SPIN</b></span><span class="small ab-d">...</span></button>`;
- if(isS9Boss()||isS11Final())return'';
- if(!heelUnlocked())return'';
- const s=eff(),canHp=R.hp>phHp(),strongerFoe=e.str>s.str;
- const dis=!canHp||!strongerFoe;
- const why=!canHp?'HP ไม่พอ':!strongerFoe?'ใช้ได้เฉพาะคู่แข่ง Str สูงกว่าเรา':'';
- return `<button data-k="PHN" class="btn-r act" ${dis?'disabled':''} onclick="useOneOneThunder()"><span class="ab-h"><span class="ab-ic">🌀</span><b class="ab-n">PHANTOM SPIN</b></span>
-<span class="small ab-d">บาดเจ็บ: HP เหลือ 15% · ผ่านคู่แข่งทันที${why?' · '+why:''}</span></button>`}
 // Phantom Spin: HP หลังใช้ท่า = 15% ของ HP สูงสุด (ไม่เพิ่มให้ถ้าต่ำกว่านั้นอยู่แล้ว)
 const phHp=()=>Math.max(1,Math.round(maxHp()*.15));
 function useOneOneThunder(){
@@ -8950,11 +9018,35 @@ R.busy=true;phantomFx(()=>{if(!R||R.over)return;R.busy=false;phantomGo('ลู�
 const oneOneJoOk=e=>{if(!S.story||!S.story.oneoneUnlocked)return false;if(isS9Boss()||isS11Fight())return false;return !!e&&!e.gk&&!e.leJuge};
 const oneLeft=()=>R.oneLeft==null?2:R.oneLeft;
 const ONE_CHANCE=0.7;
+let SPEC_CONFIRM = null;
+window.tapSpecial = function(k) {
+  if (!guard()) return;
+  if (k === 'ONE') {
+    if (SPEC_CONFIRM === 'ONE') { SPEC_CONFIRM = null; useOneOneJo(); return; }
+    SPEC_CONFIRM = 'ONE';
+    showToast('⚡ <b>วันวัน ทันเดอ</b><br>ผ่าน 70% · โจเหลือ ' + oneLeft() + ' ครั้ง<br><span style="color:#ffd54a">กดอีกครั้งเพื่อใช้ท่าทันที!</span>', 'buff');
+    setTimeout(() => { if(SPEC_CONFIRM==='ONE') SPEC_CONFIRM=null; }, 3000);
+  } else if (k === 'PHN') {
+    if (SPEC_CONFIRM === 'PHN') { SPEC_CONFIRM = null; useOneOneThunder(); return; }
+    SPEC_CONFIRM = 'PHN';
+    showToast('🌀 <b>แพนท่อม สปิน</b><br>เลือดเหลือ 15% · ผ่าน 100%<br><span style="color:#ffd54a">กดอีกครั้งเพื่อใช้ท่าทันที!</span>', 'buff');
+    setTimeout(() => { if(SPEC_CONFIRM==='PHN') SPEC_CONFIRM=null; }, 3000);
+  }
+}
+
 function oneOneJoBtn(e){
  if(!oneOneJoOk(e))return'';
- const sl=!!(R.phReady||R.phSeal),l=oneLeft(),cost=Math.max(1,Math.round(maxHp()*.10)),dis=sl||l<=0||R.hp<=cost;
- const why=sl?'ถูกปิดทาง':l<=0?'โจพักขา':R.hp<=cost?'HP ไม่พอ':'';
- return `<button data-k="ONE" class="btn-y act${(R.phReady||R.phSeal>=4)?' ph-x':''}" ${dis?'disabled':''} onclick="useOneOneJo()"><span class="ab-h"><span class="ab-ic">⚡</span><b class="ab-n">ONE-ONE THUNDER</b></span><span class="small ab-d">ผ่าน ${Math.round(ONE_CHANCE*100)}% · ขาโจ ×${l} · HP −${cost}${why?' · '+why:''}</span></button>`}
+ const sl=!!(R.phReady||R.phSeal),l=oneLeft(),cost=Math.round(maxHp()*.10),dis=sl||l<=0||R.hp<=cost;
+ return `<button data-k="ONE" class="btn-y act" ${dis?'disabled':''} onclick="tapSpecial('ONE')"><span class="ab-h"><span class="ab-n">⚡ วันวัน</span></span><span class="ab-d">ผ่าน 70%</span></button>`}
+
+function heelSpinBtn(e){
+ if(R.phUsed)return `<button data-k="PHN" class="btn-r act" disabled><span class="ab-h"><span class="ab-n">🌀 แพนท่อม</span></span><span class="ab-d">ใช้แล้ว</span></button>`;
+ if(isS9Boss()||isS11Final())return'';
+ if(!heelUnlocked())return'';
+ const s=eff(),canHp=R.hp>phHp(),strongerFoe=e.str>s.str;
+ const dis=!canHp||!strongerFoe;
+ return `<button data-k="PHN" class="btn-r act" ${dis?'disabled':''} onclick="tapSpecial('PHN')"><span class="ab-h"><span class="ab-n">🌀 แพนท่อม</span></span><span class="ab-d">ผ่าน 100%</span></button>`}
+
 function useOneOneJo(){
  if(!guard()||R.phReady||R.phSeal)return;const e=curEnemy();if(!oneOneJoOk(e)||oneLeft()<=0)return;
  const cost=Math.max(1,Math.round(maxHp()*.10));if(R.hp<=cost)return;
@@ -15166,7 +15258,10 @@ I18N.addFrag({
   "เอ็ง": "You",
     "มองกัมป์ 2 วิ → เดินออก": "Looks at Gump for 2 seconds → walks out",
   "2 วิ → เดินออก": "for 2 seconds → walks out",
-
+  "📖 สเตตแต่ละตัวทำอะไร (มายาสอน)": "📖 What does each stat do? (Maya teaches)",
+ "ด่านนี้เริ่มยากแล้วนะ... ถ้าลืมว่าอะไรชนะอะไร ให้ดูจุดสีตรงนี้": "This stage is getting tough... if you forget what beats what, just look at the colored dots here.",
+  "🟠STR › 🔵AGI › 🟣TEC › 🟠STR — แตะที่จุดดูสรุปได้ทุกเมื่อ": "🟠STR › 🔵AGI › 🟣TEC › 🟠STR — tap the dots anytime to see the summary.",
+  
   // ── UI ทั่วไป ──
   "เลือกอีก": "Pick another",
   "ชิ้นที่": "Item #",
@@ -15222,6 +15317,51 @@ I18N.add({"เลี้ยงหลบ":"Dribble Dodge","เลี้ยงอ�
    'เกมเซฟให้อัตโนมัติในเบราว์เซอร์นี้ ถ้าเปลี่ยนเครื่องหรือล้างข้อมูลเบราว์เซอร์ เซฟจะหาย',
    'เลยมี <b>โค้ดเซฟ</b> ให้ก๊อปปี้เก็บไว้ แล้ววางกลับมาโหลดได้ทุกเมื่อ']}
  ];
+
+ var EN={
+  cycle:{t:'Win/Lose & the top dots',sub:'What beats what',lines:[
+   'This game has NO PASS BUTTON... you break through all 10 defenders with these 3 moves only.',
+   'Each defender is a <b style="color:#ff8a3d">🟠 STR (Power)</b>, <b style="color:#3df2ff">🔵 AGI (Speed)</b> or <b style="color:#ff4ecd">🟣 TEC (Technique)</b> type.',
+   'Counter cycle: <b>🟠 STR beats 🔵 AGI → 🔵 AGI beats 🟣 TEC → 🟣 TEC beats 🟠 STR</b>',
+   '💨 <b>Dribble Dodge</b> beats Technique · 💪 <b>Power Charge</b> beats Speed · 💥 <b>Zero (Direct Shot)</b> beats Power.',
+   'If you forget, look at the <b>spinning colored dots at the top-left of the fight screen</b> and tap them — I will recap the cycle anytime.',
+   'Neutral moves (neither winning nor countered) can still pass, shown as a % chance. Countered moves cost HP · HP gone = GAME OVER.']},
+  moves:{t:'Special moves & holding',sub:'Charge · timing · mashing',lines:[
+   '💥 <b>ZERO CANNON</b>: hold until the gauge hits <b>MAX</b>, then release — a full charge gives a pass-chance bonus.',
+   '🌫️ <b>Shadow Drift</b> (Dribble Dodge Lv.2): hold, then release when the cursor enters the <b style="color:#ffd54a">gold zone</b> on the neural-wave gauge.',
+   '😈 <b>Buffalo Crash</b> (Power Charge Lv.2): mash the Power Charge slot 10 times in a row, no more than 0.2 s apart.',
+   'Repeating the same move does not work on everyone... switch it up, and remember the move that wins the matchup.']},
+  cafe:{t:'Cafeteria',sub:'Calories · weight · stats',lines:[
+   'Food at the cafeteria is not just for filling up... it changes your <b>“weight”</b> and your <b>“stats”</b>.',
+   'Every dish has calories — eat more than you burn and weight goes up · eat less and it goes down. Check the <b style="color:#ffb85c">🔥 kcal</b> number on the menu.',
+   'Whatever you eat gives you that dish’s stats. The menu is re-rolled every time you play a match.',
+   '🎲 <b>Gamble menu</b> (Som Tam / Moo Kratha) is a risky bet — extra stats, but your weight may jump.',
+   'Below 40 kg, your body will not absorb any stats from food at all.']},
+  weight:{t:'Weight & body zones',sub:'Thin · Fit · Muscular · Heavy',lines:[
+   'Weight decides your <b>body zone</b>: 💀 Very Thin · 🏃 Thin · ⚖ Fit · 💪 Muscular · 🐘 Heavy.',
+   'Want speed... be lean · Want strength... be heavy.',
+   'But go too extreme and your body breaks down — the most balanced zone is <b>“Fit”</b>.',
+   'Eat a variety, and do not let your weight jump all at once.']},
+  stat:{t:'Stat upgrades & the locker',sub:'🏆 button, top-right of the map',lines:[
+   'Leveling up gives stat points. Spend them at the <b>🏆 Trophy Cabinet (locker)</b> — the 🏆 button at the top-right of the map shows your remaining points.',
+   'In the locker, press <b style="color:#ffd54a">+ Up</b> next to a stat to add 1 point at a time · if you misplace points, <b>refund</b> them.',
+   '💪 <b>Str</b> power · 💨 <b>Agi</b> speed · 🎯 <b>Dex</b> accuracy · ❤️ <b>Vit</b> stamina (adds HP) · 🍀 <b>Luk</b> luck.',
+   'Each move leans on different stats: 💨 Dribble Dodge uses <b>Agi+Luk</b> · 💪 Power Charge uses <b>Str+Vit</b> · 💥 Zero uses <b>Dex+Luk</b>.',
+   'The locker also holds ⚔️ Daily Gear, 🎁 Special Collectibles and 💖 Special Items from me — go take a look.']},
+  cards:{t:'Plan cards & lifesavers',sub:'Pick 5 · VAR · Armor',lines:[
+   'Before each match you get plan cards. Stages 1–2: the coach picks. <b>From Stage 3 you pick 5 of 10 yourself</b> — choose what fits your style.',
+   '📺 <b>VAR Replay</b>: after a miss, pick a new move · 🛡 <b>Armor/Shield</b>: blocks damage.',
+   '💊 Medicine heals HP · 🔁 One-Two: land a counter-win and the next move is stronger · 🙏 Make Merit: raises Lucky Proc chance.',
+   'Mid-match events (lunch box, electrolyte bucket, etc.) can be good or risky — read before you choose.']},
+  save:{t:'Saving the game',sub:'Autosave + backup code',lines:[
+   'The game autosaves in this browser. If you switch devices or clear browser data, your save is gone.',
+   'That is why there is a <b>save code</b>: copy it somewhere safe, and paste it back to load anytime.']}
+ };
+ var UIS={th:{title:'📖 คู่มือการเล่น',hint:'เลือกหัวข้อ แล้วมายาจะมาสอนให้ · เปิดดูซ้ำได้ทุกเมื่อ',maya:'มายา',topics:'☰ หัวข้อ',next:'ถัดไป ▶',done:'จบ ✓',tap:'แตะเพื่อไปต่อ ▶'},
+  en:{title:'📖 How to Play',hint:'Pick a topic and Maya will teach you · re-open it anytime',maya:'Maya',topics:'☰ Topics',next:'Next ▶',done:'Done ✓',tap:'Tap to continue ▶'}};
+ function isEn(){try{return window.I18N&&window.I18N.lang==='en'}catch(e){return false}}
+ function U(){return UIS[isEn()?'en':'th']}
+ function TP(t){var e=isEn()&&EN[t.id];return e?{id:t.id,ic:t.ic,t:e.t,sub:e.sub,lines:e.lines}:t}
  var KEY='stk_manual_seen',seen={};
  try{seen=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
  function mark(id){seen[id]=1;try{localStorage.setItem(KEY,JSON.stringify(seen))}catch(e){}}
@@ -15235,7 +15375,7 @@ I18N.add({"เลี้ยงหลบ":"Dribble Dodge","เลี้ยงอ�
   +'.mn-x{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}'
   +'.mn-row{display:flex;align-items:center;gap:11px;padding:11px 12px;margin-bottom:8px;border-radius:12px;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);-webkit-tap-highlight-color:transparent}'
   +'.mn-row:active{background:rgba(255,138,216,.18)}.mn-ic{font-size:24px;flex:0 0 32px;text-align:center}.mn-lb{flex:1;font-weight:800;font-size:15px}.mn-lb small{display:block;font-weight:400;font-size:11.5px;opacity:.7;margin-top:1px}.mn-ck{color:#3dffa0;font-weight:900}'
-  +'.mn-sc{display:flex;gap:10px;align-items:flex-start;min-height:150px}.mn-av{flex:0 0 64px;width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px solid #ff8ad8;background:#222;display:flex;align-items:center;justify-content:center;font-size:30px}.mn-av img{width:100%;height:100%;object-fit:cover}'
+  +'.mn-sc{display:flex;gap:10px;align-items:flex-start;min-height:150px}.mn-av{flex:0 0 64px;width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px solid #ff9ec4;background:#2a1a3a;display:flex;align-items:center;justify-content:center;font-size:30px}.mn-av img{width:100%;height:100%;object-fit:cover;object-position:50% 8%;transform:scale(1.2) scaleX(-1);transform-origin:50% 8%;display:block}'
   +'.mn-bx{flex:1;background:rgba(0,0,0,.42);border-left:4px solid #ff8ad8;border-radius:10px;padding:10px 12px;font-size:14.5px;line-height:1.65}.mn-bx b.nm{display:block;color:#ff8ad8;font-size:12px;margin-bottom:3px}'
   +'.mn-ft{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;opacity:.85}.mn-btn{padding:8px 14px;border-radius:10px;border:0;font-weight:800;font-size:13.5px;cursor:pointer;background:rgba(255,255,255,.14);color:#fff}.mn-btn.y{background:#ffd54a;color:#222}';
   document.head.appendChild(st)}
@@ -15247,20 +15387,20 @@ I18N.add({"เลี้ยงหลบ":"Dribble Dodge","เลี้ยงอ�
  function closeManual(){if(ov){ov.remove();ov=null}}
  function list(){
   var o=shell();
-  o.innerHTML='<div class="mn-box"><div class="mn-hd"><div class="mn-tt">📖 คู่มือการเล่น</div><div class="mn-x" role="button" data-c="1">✕</div></div>'
-   +'<div style="font-size:12.5px;opacity:.8;margin-bottom:10px">เลือกหัวข้อ แล้วมายาจะมาสอนให้ · เปิดดูซ้ำได้ทุกเมื่อ</div>'
-   +MANUAL_TOPICS.map(function(t){return '<div class="mn-row" role="button" data-id="'+t.id+'"><span class="mn-ic">'+t.ic+'</span><span class="mn-lb">'+t.t+'<small>'+t.sub+'</small></span>'+(seen[t.id]?'<span class="mn-ck">✓</span>':'')+'</div>'}).join('')+'</div>';
+  o.innerHTML='<div class="mn-box"><div class="mn-hd"><div class="mn-tt">'+U().title+'</div><div class="mn-x" role="button" data-c="1">✕</div></div>'
+   +'<div style="font-size:12.5px;opacity:.8;margin-bottom:10px">'+U().hint+'</div>'
+   +MANUAL_TOPICS.map(TP).map(function(t){return '<div class="mn-row" role="button" data-id="'+t.id+'"><span class="mn-ic">'+t.ic+'</span><span class="mn-lb">'+t.t+'<small>'+t.sub+'</small></span>'+(seen[t.id]?'<span class="mn-ck">✓</span>':'')+'</div>'}).join('')+'</div>';
   o.querySelector('[data-c]').onclick=closeManual;
   Array.prototype.forEach.call(o.querySelectorAll('[data-id]'),function(r){r.onclick=function(){play(r.getAttribute('data-id'))}})}
  function play(id){
-  var t=MANUAL_TOPICS.filter(function(x){return x.id===id})[0];if(!t)return;
+  var t=MANUAL_TOPICS.filter(function(x){return x.id===id})[0];if(!t)return;t=TP(t);
   var i=0,o=shell();
   function pn(x){return (typeof PN==='function')?PN(x):x}
   function draw(){
    var last=i>=t.lines.length-1;
    o.innerHTML='<div class="mn-box"><div class="mn-hd"><div class="mn-tt">'+t.ic+' '+t.t+'</div><div class="mn-x" role="button" data-c="1">✕</div></div>'
-    +'<div class="mn-sc" data-n="1"><div class="mn-av"><img src="Maya11.webp" alt="" draggable="false" onerror="this.outerHTML=\'😳\'"></div><div class="mn-bx"><b class="nm">มายา</b>'+pn(t.lines[i])+'</div></div>'
-    +'<div class="mn-ft"><span>'+(i+1)+' / '+t.lines.length+' · แตะเพื่อไปต่อ ▶</span><span><button class="mn-btn" data-b="1">☰ หัวข้อ</button> <button class="mn-btn y" data-n2="1">'+(last?'จบ ✓':'ถัดไป ▶')+'</button></span></div></div>';
+    +'<div class="mn-sc" data-n="1"><div class="mn-av"><img src="Maya11.webp" alt="" draggable="false" onerror="this.outerHTML=\'😳\'"></div><div class="mn-bx"><b class="nm">'+U().maya+'</b>'+pn(t.lines[i])+'</div></div>'
+    +'<div class="mn-ft"><span>'+(i+1)+' / '+t.lines.length+' · '+U().tap+'</span><span><button class="mn-btn" data-b="1">'+U().topics+'</button> <button class="mn-btn y" data-n2="1">'+(last?U().done:U().next)+'</button></span></div></div>';
    o.querySelector('[data-c]').onclick=closeManual;
    o.querySelector('[data-b]').onclick=function(e){e.stopPropagation();list()};
    var next=function(e){if(e)e.stopPropagation();if(i>=t.lines.length-1){mark(id);list()}else{i++;draw()}};
