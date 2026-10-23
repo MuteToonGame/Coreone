@@ -94,6 +94,11 @@ button:active{transform:translateY(1px) scale(.99)}
   box-shadow:0 3px 14px rgba(255,213,74,.7);
   animation:onbPulse 1.6s ease-in-out infinite;
 }
+.tcy-ptr{position:fixed;z-index:10000;width:0;height:0;pointer-events:none}
+.tcy-ring{position:absolute;left:-20px;top:-20px;width:40px;height:40px;border-radius:50%;border:3px solid #ffd54a;box-shadow:0 0 14px #ffd54a;animation:tcyRing 1s ease-in-out infinite}
+.tcy-arrow{position:absolute;left:-14px;top:22px;font-size:26px;animation:tcyBob .7s ease-in-out infinite}
+@keyframes tcyRing{0%,100%{transform:scale(.9);opacity:.7}50%{transform:scale(1.25);opacity:1}}
+@keyframes tcyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
 .tcy{display:inline-flex;width:24px;height:24px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .tcy svg{width:100%;height:100%;animation:tcySpin 5s linear infinite;will-change:transform}
 @keyframes tcySpin{to{transform:rotate(360deg)}}
@@ -2948,6 +2953,7 @@ function scrTrophy(from){
      <span class="pill gold" style="font-size:12px;">ของใช้สะสม ${baseOwned}/16</span>
    </div>
    <p class="small" style="margin:4px 0 0;opacity:0.85;">ตู้เก็บของหลังซ้อมฟุตบอล เก็บเกียร์และของสำคัญไว้ที่นี่</p>
+ <div style="text-align:center;margin-top:6px"><span role="button" onclick="openManual('stat')" style="font-size:13px;padding:4px 12px;border-radius:10px;background:rgba(255,138,216,.28);cursor:pointer;display:inline-block">📖 สเตตแต่ละตัวทำอะไร (มายาสอน)</span></div>
  </div>
 
  <!-- 2. ส่วนที่หายไป: กล่องสำหรับแสดงปุ่มอัปเกรดสเตตัส -->
@@ -3425,7 +3431,7 @@ function scrCafeteriaRender(){
 
   render(
     `<div class="card" style="padding:14px 16px 12px">
-      <h2 style="margin-bottom:8px">🍜 โรงอาหารหลังเกม</h2>
+      <h2 style="margin-bottom:8px">🍜 โรงอาหารหลังเกม <span role="button" onclick="openManual('cafe')" style="font-size:13px;padding:2px 8px;border-radius:10px;background:rgba(255,138,216,.25);cursor:pointer;vertical-align:middle">📖 มายาสอน</span></h2>
       <div class="row caf-hdr" style="align-items:center;margin-bottom:6px">
         <b class="gold" style="font-size:20px">${baht(S.mp||0)}</b>
         <span class="pill">${bodyLabel(S.body.w)} (${S.body.w.toFixed(1)}kg)</span>${(S.debt>0)?`<span class="pill" style="color:#ff9a9a">💸 หนี้ ${baht(S.debt)}</span>`:''}
@@ -6150,7 +6156,27 @@ const S5_CUTIN_SAVE1_HTML='<div class="s2cutfx s5cutfx save1"></div><div class="
 const S5_CUTIN_SAVE2_HTML='<div class="s2cutfx s5cutfx save2"></div><div class="s2cut s5cut save2"><img src="Boss5save2.webp" alt="" draggable="false" onerror="this.src=\'Boss5.webp\'"><span class="s5cut-tx">VOLT SLAP · ฟ้าผ่าตบบอล</span></div>';
 const S5_CUTIN_BRK_HTML='<div class="s2cutfx s5cutfx brk"></div><div class="s2cut s5cut brk"><img src="Boss5.webp" alt="" draggable="false" onerror="this.remove()"></div>';
 
+/* ===== มายาชี้จุดสีด้านบน (ใช้ทั้งด่าน 5 และปุ่มคู่มือ) ===== */
+function mayaPointTcy(on){
+ document.querySelectorAll('.tcy-ptr').forEach(e=>e.remove());
+ if(!on)return;
+ const t=document.querySelector('.tcy');if(!t)return;
+ const r=t.getBoundingClientRect();
+ const d=document.createElement('div');d.className='tcy-ptr';
+ d.style.left=(r.left+r.width/2)+'px';d.style.top=(r.top+r.height/2)+'px';
+ d.innerHTML='<i class="tcy-ring"></i><b class="tcy-arrow">☝️</b>';
+ document.body.appendChild(d);
+ setTimeout(()=>d.remove(),20000)}
+const MAYA_TCY_LINES=[
+ {who:'maya',text:'ด่านนี้เริ่มยากแล้วนะ... ถ้าลืมว่าอะไรชนะอะไร ให้ดูจุดสีตรงนี้'},
+ {who:'maya',text:'🟠STR › 🔵AGI › 🟣TEC › 🟠STR — แตะที่จุดดูสรุปได้ทุกเมื่อ'}];
 function s5FightBubbles(){
+ if(R.phase==='def'&&R.idx===4&&isStage5()&&!s5Seen('tcyTip')){
+  s5Mark('tcyTip');
+  R.bubTalk=true;R.busy=true;scrBattle();
+  setTimeout(()=>mayaPointTcy(true),60);
+  bubbleSay(MAYA_TCY_LINES.map(x=>Object.assign({},x)),()=>{mayaPointTcy(false);R.bubTalk=false;R.busy=false;scrBattle()});
+  return}
  if(R.phase!=='gk'||!isStage5())return;
  if(s5Seen('gk'))return;
  s5Mark('gk');R.s5zc=0;R.s5saveN=0;
@@ -6805,11 +6831,14 @@ function s8FightBubbles(){
  bubbleAdd({who:'vik',text:cmdTxt})}
 function vik8Obey(k){
  log('⚠️ ทำตามคำสั่งวิค! '+ACTIONS[k].n+' → พลาดทันที!','bad');
- const r=R;
- loseClash(k);
+ loseClash(k)}
+/* วิคต้องเชื่อมั่นในตัวเอง: พลาดทุกครั้ง (ไม่ว่ากดอะไร) วิคออกมาสั่งใหม่ด้วยท่าที่สั่งไว้แต่แรก ผู้เล่นจะได้รู้ว่าพลาดเพราะอะไร */
+function s8MissBubble(){
+ if(!isStage8Fight()||!R||!R.vik8Cmd)return;
+ const r=R,cmd=R.vik8Cmd,cmdTxt=(ACTIONS[cmd]?ACTIONS[cmd].i+' ':'')+cmd+'!';
  setTimeout(()=>{
-  if(R!==r||R.over||R.phase==='gk'||R.idx!==0)return;
-  bubbleSay([{who:'vik',text:'ห๊ะ!!?'},{who:'vik',text:'เอาใหม่!?'}])
+  if(R!==r||R.over)return;
+  bubbleSay([{who:'vik',text:'เอาใหม่!'},{who:'vik',text:'ข้าบอกให้ใช้ท่า '+cmdTxt}])
  },900)}
 function s8WinBubble(){
  R.vik8Seen=R.vik8Seen||{};
@@ -9678,7 +9707,7 @@ function confirmPicks(){
  encounter();
 }
 
-function loseClash(k,instant){tutResult(false);if(R&&R.endless)endlessOnLose(k);
+function loseClash(k,instant){tutResult(false);if(R&&R.endless)endlessOnLose(k);if(typeof s8MissBubble==='function')s8MissBubble();
  R.winStreak=0;
  R.missStreak=(R.missStreak||0)+1;
  R.maxMissStreak=Math.max(R.maxMissStreak||0,R.missStreak);
@@ -14896,9 +14925,9 @@ setInterval(() => {
   /* ================= หน้าตั้งค่า ================= */
   var UI = {
     th: { title: 'ตั้งค่า', sound: 'เสียง', master: 'เสียงทั้งหมด', sfx: 'เสียงเอฟเฟกต์', bgm: 'เพลงพื้นหลัง', vid: 'เสียงวิดีโอ / คัตซีน',
-      lang: 'ภาษา', done: 'เสร็จสิ้น', hint: 'กด M บนคีย์บอร์ด = ปิด/เปิดเสียงทั้งหมด', note: '', close: 'ปิด' },
+      lang: 'ภาษา', guide: 'คู่มือ', manual: 'คู่มือการเล่น (มายาสอน)', done: 'เสร็จสิ้น', hint: 'กด M บนคีย์บอร์ด = ปิด/เปิดเสียงทั้งหมด', note: '', close: 'ปิด' },
     en: { title: 'Settings', sound: 'Sound', master: 'All sound', sfx: 'Sound effects', bgm: 'Background music', vid: 'Video / cutscene audio',
-      lang: 'Language', done: 'Done', hint: 'Press M on keyboard = mute / unmute all', note: 'Menus and buttons are translated. Story dialogue is still in Thai for now.', close: 'Close' }
+      lang: 'Language', guide: 'Guide', manual: 'How to play (Maya teaches)', done: 'Done', hint: 'Press M on keyboard = mute / unmute all', note: 'Menus and buttons are translated. Story dialogue is still in Thai for now.', close: 'Close' }
   };
   var FLAG_TH = '<svg viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#fff"/><rect width="60" height="6.67" fill="#A51931"/><rect y="33.33" width="60" height="6.67" fill="#A51931"/><rect y="13.33" width="60" height="13.34" fill="#2D2A4A"/></svg>';
   var FLAG_EN = '<svg viewBox="0 0 60 30" aria-hidden="true"><clipPath id="stgUkS"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="stgUkT"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#stgUkS)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#stgUkT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>';
@@ -14956,6 +14985,8 @@ setInterval(() => {
       '<div class="stg-row" role="button" data-a="sfx"><span class="stg-ic">💥</span><span class="stg-lb">' + T.sfx + '</span>' + sw(s.sfx) + '</div>' +
       '<div class="stg-row" role="button" data-a="bgm"><span class="stg-ic">🎵</span><span class="stg-lb">' + T.bgm + '</span>' + sw(s.bgm) + '</div>' +
       '<div class="stg-row" role="button" data-a="vid"><span class="stg-ic">🎬</span><span class="stg-lb">' + T.vid + '</span>' + sw(s.vid) + '</div>' +
+      '<div class="stg-sec">📖 ' + T.guide + '</div>' +
+      '<div class="stg-row" role="button" data-a="manual"><span class="stg-ic">📖</span><span class="stg-lb">' + T.manual + '</span></div>' +
       '<div class="stg-sec">🌐 ' + T.lang + '</div>' +
       '<div class="stg-lang">' +
         '<div class="stg-lg' + (lang === 'th' ? ' on' : '') + '" role="button" data-a="lang-th"><div class="stg-fl">' + FLAG_TH + '</div><div class="stg-ln">ไทย</div></div>' +
@@ -14984,6 +15015,7 @@ setInterval(() => {
     if (a === 'close') closeSettings();
     else if (a === 'master') { var v = !(s.sfx || s.bgm || s.vid); setSound('sfx', v); setSound('bgm', v); setSound('vid', v); paint(); if (v && window.SFX) window.SFX.play('confirm'); }
     else if (a === 'sfx' || a === 'bgm' || a === 'vid') { setSound(a, !s[a]); paint(); if (a !== 'vid' && state()[a] && window.SFX) window.SFX.play('confirm'); }
+    else if (a === 'manual') { closeSettings(); if (typeof window.openManual === 'function') window.openManual(); }
     else if (a === 'lang-th') setLang('th');
     else if (a === 'lang-en') setLang('en');
   }
@@ -15145,6 +15177,98 @@ I18N.addFrag({
 <script>
 /* ชื่อท่าในปุ่มโหมดย่อ: เกมตัดวงเล็บท้ายชื่อออกก่อนแสดง จึงเหลือ "เลี้ยงหลบ Lv.2" / "เลี้ยงอัด Lv.2" ที่ไม่มีคำแปลตรงตัว */
 I18N.add({"เลี้ยงหลบ":"Dribble Dodge","เลี้ยงอัด":"Power Charge"});
+</script>
+
+<script>
+/* ===== 📖 คู่มือการเล่น (มายาสอน) — เปิดจาก ⚙️ ตั้งค่า =====
+   แก้ข้อความที่ MANUAL_TOPICS ที่เดียว (หัวข้อ + บทมายา) */
+(function(){
+ var MANUAL_TOPICS=[
+  {id:'cycle',ic:'🎯',t:'แพ้ชนะ & จุดสีด้านบน',sub:'อะไรชนะอะไร',lines:[
+   'เกมนี้ไม่มีปุ่มส่งนะ... ฝ่ากองหลังทั้ง 10 คนด้วย 3 ท่านี้เท่านั้น',
+   'กองหลังแต่ละคนมีสาย <b style="color:#ff8a3d">🟠 STR (พลัง)</b> · <b style="color:#3df2ff">🔵 AGI (เร็ว)</b> · <b style="color:#ff4ecd">🟣 TEC (เทคนิค)</b>',
+   'วงจรชนะทาง: <b>🟠 STR ชนะ 🔵 AGI → 🔵 AGI ชนะ 🟣 TEC → 🟣 TEC ชนะ 🟠 STR</b>',
+   '💨 <b>เลี้ยงหลบ</b> ชนะสายเทคนิค · 💪 <b>เลี้ยงอัด</b> ชนะสายเร็ว · 💥 <b>ซีโร่ (ยิงตรง)</b> ชนะสายพลัง',
+   'ถ้าลืม ให้ดู <b>จุดสีวงกลมหมุนๆ มุมซ้ายบนของหน้าสู้</b> แล้วแตะที่จุด ฉันสรุปวงจรให้เสมอ',
+   'ท่ากลางๆ (ไม่ชนะ ไม่แพ้ทาง) ก็ผ่านได้ แต่ดูเป็น % โอกาส — ท่าที่แพ้ทางคือเจ็บ HP · HP หมด = GAME OVER']},
+  {id:'moves',ic:'💥',t:'ท่าพิเศษ & การกดค้าง',sub:'ชาร์จ · จับจังหวะ · กดรัว',lines:[
+   '💥 <b>ZERO CANNON</b>: กดค้างจนเกจเต็ม <b>MAX</b> แล้วค่อยปล่อย — ชาร์จเต็มได้โบนัสโอกาสผ่าน',
+   '🌫️ <b>Shadow Drift</b> (เลี้ยงหลบ Lv.2): กดค้าง แล้วปล่อยตอนเคอร์เซอร์เข้า <b style="color:#ffd54a">โซนทอง</b> บนเกจคลื่นประสาท',
+   '😈 <b>Buffalo Crash</b> (เลี้ยงอัด Lv.2): กดรัวๆ ที่ช่องเลี้ยงอัดติดกัน 10 ครั้ง ห่างกันไม่เกิน 0.2 วิ',
+   'ใช้ท่าเดิมซ้ำๆ ไม่ได้ผลกับทุกคน... สลับท่าบ้าง แล้วอย่าลืมใช้ท่าที่ชนะทาง']},
+  {id:'cafe',ic:'🍜',t:'โรงอาหาร',sub:'แคลอรี่ · น้ำหนัก · สเตต',lines:[
+   'อาหารที่โรงอาหารไม่ได้แค่ให้อิ่ม... มันเปลี่ยน <b>“น้ำหนัก”</b> กับ <b>“สเตต”</b> ของนาย',
+   'ทุกจานมีแคลอรี่ — กินเกินที่เผา น้ำหนักขึ้น · กินน้อยกว่าที่เผา น้ำหนักลง ดูเลข <b style="color:#ffb85c">🔥 kcal</b> บนเมนู',
+   'กินจานไหน จะได้สเตตของจานนั้นติดตัวไป เมนูที่เห็นจะสุ่มใหม่ทุกครั้งที่ไปเตะ',
+   '🎲 <b>เมนูลุ้นโชค</b> (ส้มตำ/หมูกะทะ) เสี่ยงดวง — ได้สเตตเพิ่มแต่น้ำหนักอาจกระโดด',
+   'ถ้าต่ำกว่า 40 กก. ร่างกายจะไม่ดูดซึมสเตตจากอาหารเลยนะ']},
+  {id:'weight',ic:'⚖️',t:'น้ำหนัก & โซนร่างกาย',sub:'ผอม · พอดี · ล่ำ · อ้วน',lines:[
+   'น้ำหนักส่งผลต่อ <b>โซนร่างกาย</b>: 💀 ผอมมาก · 🏃 ผอม · ⚖ พอดี · 💪 ล่ำ · 🐘 อ้วน',
+   'อยากเร็ว... ต้องบาง · อยากแกร่ง... ต้องหนา',
+   'แต่สุดโต่งเกินไปร่างกายพัง — โซนที่สมดุลที่สุดคือ <b>“พอดี”</b>',
+   'กินให้หลากหลาย อย่าให้น้ำหนักกระโดดทีเดียว']},
+  {id:'stat',ic:'🏋️',t:'อัปสเตต & ตู้เก็บของ',sub:'ปุ่ม 🏆 มุมขวาบนของแผนที่',lines:[
+   'เลเวลอัปแล้วได้แต้มสเตตัส ไปแจกที่ <b>🏆 ตู้เกียรติยศ (ตู้เก็บของ)</b> — ปุ่ม 🏆 มุมขวาบนของแผนที่ มีเลขแต้มที่เหลือติดอยู่',
+   'ในหน้าตู้ กดปุ่ม <b style="color:#ffd54a">+ อัป</b> ข้างสเตตที่อยากเพิ่มทีละ 1 แต้ม · แจกผิดกด <b>คืนแต้ม</b> ได้',
+   '💪 <b>Str</b> พลัง · 💨 <b>Agi</b> เร็ว · 🎯 <b>Dex</b> แม่น · ❤️ <b>Vit</b> อึด (เพิ่ม HP) · 🍀 <b>Luk</b> โชค',
+   'แต่ละท่าใช้สเตตไม่เหมือนกัน: 💨 เลี้ยงหลบ เน้น <b>Agi+Luk</b> · 💪 เลี้ยงอัด เน้น <b>Str+Vit</b> · 💥 ซีโร่ เน้น <b>Dex+Luk</b>',
+   'ในตู้ยังมี ⚔️ เกียร์ประจำวัน, 🎁 ของสะสมพิเศษ และ 💖 ของจากฉัน — กดดูได้เลย']},
+  {id:'cards',ic:'🃏',t:'การ์ดแผน & ไอเทมช่วยชีวิต',sub:'เลือก 5 ใบ · VAR · เกราะ',lines:[
+   'ก่อนลงสนามจะมีการ์ดแผน ด่าน 1–2 โค้ชเลือกให้ <b>ตั้งแต่ด่าน 3 นายเลือกเองได้ 5 ใบจาก 10 ใบ</b> เลือกให้เข้ากับสไตล์',
+   '📺 <b>VAR รีเพลย์</b>: พลาดแล้วเลือกท่าใหม่ได้ · 🛡 <b>เกราะ/โล่</b>: กันดาเมจไว้',
+   '💊 ยาฮีล HP · 🔁 วัน-ทู: ชนะทางแล้วท่าถัดไปแรงขึ้น · 🙏 ไหว้พระ: เพิ่มโอกาส Lucky Proc',
+   'ตอนจั่วอีเวนต์กลางเกม (ข้าวกล่อง ถังเกลือแร่ ฯลฯ) มีทั้งดีและเสี่ยง — อ่านก่อนเลือก']},
+  {id:'save',ic:'💾',t:'เซฟเกม',sub:'เซฟอัตโนมัติ + โค้ดสำรอง',lines:[
+   'เกมเซฟให้อัตโนมัติในเบราว์เซอร์นี้ ถ้าเปลี่ยนเครื่องหรือล้างข้อมูลเบราว์เซอร์ เซฟจะหาย',
+   'เลยมี <b>โค้ดเซฟ</b> ให้ก๊อปปี้เก็บไว้ แล้ววางกลับมาโหลดได้ทุกเมื่อ']}
+ ];
+ var KEY='stk_manual_seen',seen={};
+ try{seen=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
+ function mark(id){seen[id]=1;try{localStorage.setItem(KEY,JSON.stringify(seen))}catch(e){}}
+ var ov=null;
+ function css(){
+  if(document.getElementById('mnCss'))return;
+  var st=document.createElement('style');st.id='mnCss';
+  st.textContent='.mn-ov{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;background:rgba(5,8,20,.88);padding:16px;font-family:inherit;color:#fff}'
+  +'.mn-box{width:100%;max-width:420px;max-height:92vh;overflow:auto;background:linear-gradient(165deg,#1a2140,#0e1228);border:2px solid #ff8ad8;border-radius:16px;padding:16px;box-shadow:0 0 36px rgba(255,138,216,.28)}'
+  +'.mn-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.mn-tt{font-size:19px;font-weight:900;color:#ffd54a}'
+  +'.mn-x{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}'
+  +'.mn-row{display:flex;align-items:center;gap:11px;padding:11px 12px;margin-bottom:8px;border-radius:12px;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);-webkit-tap-highlight-color:transparent}'
+  +'.mn-row:active{background:rgba(255,138,216,.18)}.mn-ic{font-size:24px;flex:0 0 32px;text-align:center}.mn-lb{flex:1;font-weight:800;font-size:15px}.mn-lb small{display:block;font-weight:400;font-size:11.5px;opacity:.7;margin-top:1px}.mn-ck{color:#3dffa0;font-weight:900}'
+  +'.mn-sc{display:flex;gap:10px;align-items:flex-start;min-height:150px}.mn-av{flex:0 0 64px;width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px solid #ff8ad8;background:#222;display:flex;align-items:center;justify-content:center;font-size:30px}.mn-av img{width:100%;height:100%;object-fit:cover}'
+  +'.mn-bx{flex:1;background:rgba(0,0,0,.42);border-left:4px solid #ff8ad8;border-radius:10px;padding:10px 12px;font-size:14.5px;line-height:1.65}.mn-bx b.nm{display:block;color:#ff8ad8;font-size:12px;margin-bottom:3px}'
+  +'.mn-ft{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;opacity:.85}.mn-btn{padding:8px 14px;border-radius:10px;border:0;font-weight:800;font-size:13.5px;cursor:pointer;background:rgba(255,255,255,.14);color:#fff}.mn-btn.y{background:#ffd54a;color:#222}';
+  document.head.appendChild(st)}
+ function shell(){
+  css();if(!ov){ov=document.createElement('div');ov.className='modal mn-ov';
+   ov.style.cssText='position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;background:rgba(5,8,20,.88);padding:16px';
+   ov.addEventListener('click',function(e){if(e.target===ov)closeManual()});document.body.appendChild(ov)}
+  return ov}
+ function closeManual(){if(ov){ov.remove();ov=null}}
+ function list(){
+  var o=shell();
+  o.innerHTML='<div class="mn-box"><div class="mn-hd"><div class="mn-tt">📖 คู่มือการเล่น</div><div class="mn-x" role="button" data-c="1">✕</div></div>'
+   +'<div style="font-size:12.5px;opacity:.8;margin-bottom:10px">เลือกหัวข้อ แล้วมายาจะมาสอนให้ · เปิดดูซ้ำได้ทุกเมื่อ</div>'
+   +MANUAL_TOPICS.map(function(t){return '<div class="mn-row" role="button" data-id="'+t.id+'"><span class="mn-ic">'+t.ic+'</span><span class="mn-lb">'+t.t+'<small>'+t.sub+'</small></span>'+(seen[t.id]?'<span class="mn-ck">✓</span>':'')+'</div>'}).join('')+'</div>';
+  o.querySelector('[data-c]').onclick=closeManual;
+  Array.prototype.forEach.call(o.querySelectorAll('[data-id]'),function(r){r.onclick=function(){play(r.getAttribute('data-id'))}})}
+ function play(id){
+  var t=MANUAL_TOPICS.filter(function(x){return x.id===id})[0];if(!t)return;
+  var i=0,o=shell();
+  function pn(x){return (typeof PN==='function')?PN(x):x}
+  function draw(){
+   var last=i>=t.lines.length-1;
+   o.innerHTML='<div class="mn-box"><div class="mn-hd"><div class="mn-tt">'+t.ic+' '+t.t+'</div><div class="mn-x" role="button" data-c="1">✕</div></div>'
+    +'<div class="mn-sc" data-n="1"><div class="mn-av"><img src="Maya11.webp" alt="" draggable="false" onerror="this.outerHTML=\'😳\'"></div><div class="mn-bx"><b class="nm">มายา</b>'+pn(t.lines[i])+'</div></div>'
+    +'<div class="mn-ft"><span>'+(i+1)+' / '+t.lines.length+' · แตะเพื่อไปต่อ ▶</span><span><button class="mn-btn" data-b="1">☰ หัวข้อ</button> <button class="mn-btn y" data-n2="1">'+(last?'จบ ✓':'ถัดไป ▶')+'</button></span></div></div>';
+   o.querySelector('[data-c]').onclick=closeManual;
+   o.querySelector('[data-b]').onclick=function(e){e.stopPropagation();list()};
+   var next=function(e){if(e)e.stopPropagation();if(i>=t.lines.length-1){mark(id);list()}else{i++;draw()}};
+   o.querySelector('[data-n]').onclick=next;o.querySelector('[data-n2]').onclick=next}
+  draw()}
+ window.openManual=function(topic){if(topic)play(topic);else list()};
+ window.MANUAL_TOPICS=MANUAL_TOPICS;
+})();
 </script>
 </body>
 </html>
