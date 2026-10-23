@@ -8963,6 +8963,7 @@ if (actsArr.length >= 3) {
     gridHTML += `<div style="grid-column:span 4">${actsArr[2]}</div>`;
   }
   }
+   
 return `<div class="acts-grid-custom">${gridHTML}${skip}</div>`;
  })()}</div>`
  :`<div class="card stage-ui" style="text-align:center;padding:10px">
@@ -9018,18 +9019,27 @@ R.busy=true;phantomFx(()=>{if(!R||R.over)return;R.busy=false;phantomGo('ลู�
 const oneOneJoOk=e=>{if(!S.story||!S.story.oneoneUnlocked)return false;if(isS9Boss()||isS11Fight())return false;return !!e&&!e.gk&&!e.leJuge};
 const oneLeft=()=>R.oneLeft==null?2:R.oneLeft;
 const ONE_CHANCE=0.7;
-let SPEC_CONFIRM = null;
+
+  let SPEC_CONFIRM = null;
+function hideSpecToast(){ const t=document.getElementById('itemToast'); if(t) t.remove(); }
 window.tapSpecial = function(k) {
   if (!guard()) return;
+  const isEn = I18N.lang === 'en';
   if (k === 'ONE') {
-    if (SPEC_CONFIRM === 'ONE') { SPEC_CONFIRM = null; useOneOneJo(); return; }
+    if (SPEC_CONFIRM === 'ONE') { SPEC_CONFIRM = null; hideSpecToast(); useOneOneJo(); return; }
     SPEC_CONFIRM = 'ONE';
-    showToast('⚡ <b>วันวัน ทันเดอ</b><br>ผ่าน 70% · โจเหลือ ' + oneLeft() + ' ครั้ง<br><span style="color:#ffd54a">กดอีกครั้งเพื่อใช้ท่าทันที!</span>', 'buff');
+    const title = isEn ? '⚡ <b>ONE-ONE Thunder</b>' : '⚡ <b>วันวัน ทันเดอ</b>';
+    const desc = isEn ? `Pass 70% · Jo has ${oneLeft()} uses left` : `ผ่าน 70% · โจเหลือ ${oneLeft()} ครั้ง`;
+    const hint = isEn ? 'Press again to use the move immediately!' : 'กดอีกครั้งเพื่อใช้ท่าทันที!';
+    showToast(`${title}<br>${desc}<br><span style="color:#ffd54a">${hint}</span>`, 'buff');
     setTimeout(() => { if(SPEC_CONFIRM==='ONE') SPEC_CONFIRM=null; }, 3000);
   } else if (k === 'PHN') {
-    if (SPEC_CONFIRM === 'PHN') { SPEC_CONFIRM = null; useOneOneThunder(); return; }
+    if (SPEC_CONFIRM === 'PHN') { SPEC_CONFIRM = null; hideSpecToast(); useOneOneThunder(); return; }
     SPEC_CONFIRM = 'PHN';
-    showToast('🌀 <b>แพนท่อม สปิน</b><br>เลือดเหลือ 15% · ผ่าน 100%<br><span style="color:#ffd54a">กดอีกครั้งเพื่อใช้ท่าทันที!</span>', 'buff');
+    const title = isEn ? '🌀 <b>Phantom Spin</b>' : '🌀 <b>แพนท่อม สปิน</b>';
+    const desc = isEn ? 'HP left 15% · 100% pass' : 'เลือดเหลือ 15% · ผ่าน 100%';
+    const hint = isEn ? 'Press again to use the move immediately!' : 'กดอีกครั้งเพื่อใช้ท่าทันที!';
+    showToast(`${title}<br>${desc}<br><span style="color:#ffd54a">${hint}</span>`, 'buff');
     setTimeout(() => { if(SPEC_CONFIRM==='PHN') SPEC_CONFIRM=null; }, 3000);
   }
 }
@@ -9037,15 +9047,23 @@ window.tapSpecial = function(k) {
 function oneOneJoBtn(e){
  if(!oneOneJoOk(e))return'';
  const sl=!!(R.phReady||R.phSeal),l=oneLeft(),cost=Math.round(maxHp()*.10),dis=sl||l<=0||R.hp<=cost;
- return `<button data-k="ONE" class="btn-y act" ${dis?'disabled':''} onclick="tapSpecial('ONE')"><span class="ab-h"><span class="ab-n">⚡ วันวัน</span></span><span class="ab-d">ผ่าน 70%</span></button>`}
+ const btnName = I18N.lang === 'en' ? '⚡ One-One' : '⚡ วันวัน';
+ const btnDesc = I18N.lang === 'en' ? 'Pass 70%' : 'ผ่าน 70%';
+ return `<button data-k="ONE" class="btn-y act" ${dis?'disabled':''} onclick="tapSpecial('ONE')"><span class="ab-h"><span class="ab-n">${btnName}</span></span><span class="ab-d">${btnDesc}</span></button>`}
 
 function heelSpinBtn(e){
- if(R.phUsed)return `<button data-k="PHN" class="btn-r act" disabled><span class="ab-h"><span class="ab-n">🌀 แพนท่อม</span></span><span class="ab-d">ใช้แล้ว</span></button>`;
+ if(R.phUsed){
+   const btnName = I18N.lang === 'en' ? '🌀 Phantom Spin' : '🌀 แพนท่อม';
+   const btnDesc = I18N.lang === 'en' ? 'Used' : 'ใช้แล้ว';
+   return `<button data-k="PHN" class="btn-r act" disabled><span class="ab-h"><span class="ab-n">${btnName}</span></span><span class="ab-d">${btnDesc}</span></button>`;
+ }
  if(isS9Boss()||isS11Final())return'';
  if(!heelUnlocked())return'';
  const s=eff(),canHp=R.hp>phHp(),strongerFoe=e.str>s.str;
  const dis=!canHp||!strongerFoe;
- return `<button data-k="PHN" class="btn-r act" ${dis?'disabled':''} onclick="tapSpecial('PHN')"><span class="ab-h"><span class="ab-n">🌀 แพนท่อม</span></span><span class="ab-d">ผ่าน 100%</span></button>`}
+ const btnName = I18N.lang === 'en' ? '🌀 Phantom Spin' : '🌀 แพนท่อม';
+ const btnDesc = I18N.lang === 'en' ? 'Pass 100%' : 'ผ่าน 100%';
+ return `<button data-k="PHN" class="btn-r act" ${dis?'disabled':''} onclick="tapSpecial('PHN')"><span class="ab-h"><span class="ab-n">${btnName}</span></span><span class="ab-d">${btnDesc}</span></button>`}
 
 function useOneOneJo(){
  if(!guard()||R.phReady||R.phSeal)return;const e=curEnemy();if(!oneOneJoOk(e)||oneLeft()<=0)return;
