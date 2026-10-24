@@ -4291,7 +4291,7 @@ const DEF_FILE={SPD:'Defagi.webp',PWR:'Defstr.webp',TAC:'Deftec.webp',GK:'Defgo.
 const DEF_FACES_LEFT=true;
 const DEF_SIZE={SPD:.97,PWR:1.08,TAC:1,GK:1.272,TUTOR:1.05,MIKA:1.35};
 const DEF_STAGE_SIZE=1;
-const DEF_STAGE_SCALE={5:1.2,9:1.1, 6:1.1, 8:1.2, 10:1.1};
+const DEF_STAGE_SCALE={5:1.2,9:1.1, 6:1.1, 8:1, 10:1};
 const DEF_DETECT_TOP=.44;
 const DEF_APPLY_TOP=.30;
 const DEF_MAXH=384;
@@ -14959,6 +14959,7 @@ setInterval(() => {
   var inModal = function (n) { var p = n.nodeType === 1 ? n : n.parentNode; return !!(p && p.closest && p.closest('#stgOv')); };
 
   function doText(n) {
+    var pnn = n.parentNode && n.parentNode.nodeName; if (pnn === 'SCRIPT' || pnn === 'STYLE') return;   /* ห้ามแปลโค้ด/CSS */
     var v = n.nodeValue, r = recs.get(n);
     if (r && v === r.t) v = r.o;
     if (!TH.test(v)) { if (r && n.nodeValue !== r.t) recs.delete(n); return; }
@@ -15021,7 +15022,8 @@ setInterval(() => {
         else if (m.type === 'attributes') pendA.add(m.target);
         else for (var j = 0; j < m.addedNodes.length; j++) pend.add(m.addedNodes[j]);
       }
-      if (!sched && (pend.size || pendA.size)) { sched = true; requestAnimationFrame(flush); }
+      /* แปลทันทีใน microtask (ก่อนจอวาด) กันข้อความไทยวาบขึ้นมา 1 เฟรมตอนบับเบิล/ฉากใหม่โผล่ */
+      if (pend.size || pendA.size) flush();
     });
     mo.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS });
   } catch (e) {}
