@@ -13531,7 +13531,7 @@ j('พวกนาย... บ้าพอกันทั้งคู่เลย�
     
     { scene: { bg: BG, dark: true, clear: true, set: { maya: C('maya', 50, 50) } } },
     { dir: 'สนามทดสอบ · แสงไฟเริ่มดับ · มายายืนคนเดียว' },
-    { dir: 'ภาพโคลสอัพ: หน้าจอแท็บเล็ต', tab: { lines: ['TARGET: ' + I18N.t(PN('กัมป์')).toUpperCase(), 'KINETIC ASSESSMENT 100% COMPLETE'] }},
+    { dir: 'ภาพโคลสอัพ: หน้าจอแท็บเล็ต', tab: { lines: ['TARGET: @@PN@@', 'KINETIC ASSESSMENT 100% COMPLETE'] }},
     th('(กัมป์... ขอบใจนะ)'), th('(ที่ทำให้ฉัน...)'), th('(ได้รู้ว่าการมีชีวิต... มันเป็นยังไง)'),
     { dir: 'มายากดลบไฟล์', fx: 'glitch' },
     { dir: 'ตัวหนังสือเปลี่ยนเป็นสีแดง · เสียงคลื่นสัญญาณแทรกในหูฟัง', tab: { red: true, lines: ['SYSTEM OVERRIDE...', 'DATA: PARTIALLY CORRUPTED'] }, fx: 'static' },
@@ -13706,10 +13706,11 @@ j('พวกนาย... บ้าพอกันทั้งคู่เลย�
       world.classList.toggle('dark', !!s.dark);
       if (s.set) Object.keys(s.set).forEach(id => setChar(id, s.set[id]));
     }
+    function nmUpper() { let n = PN('กัมป์'); try { if (typeof I18N !== 'undefined') n = I18N.t(n); } catch (e) {} return String(n).toUpperCase(); }
     function tabShow(t) {
       if (t === null) { tab.classList.remove('on', 'red'); return; }
       tab.classList.add('on'); tab.classList.toggle('red', !!t.red);
-      scr.innerHTML = '<div class="l" style="animation-delay:.1s;opacity:.7">' + (t.red ? '⚠ KAI SECURE' : '⚡ KINETIC LOG') + '</div>' + t.lines.map((x, i) => '<div class="l" style="animation-delay:' + (.5 + i * .45) + 's">' + x + '</div>').join('');
+      scr.innerHTML = '<div class="l" style="animation-delay:.1s;opacity:.7">' + (t.red ? '⚠ KAI SECURE' : '⚡ KINETIC LOG') + '</div>' + t.lines.map((x, i) => '<div class="l" style="animation-delay:' + (.5 + i * .45) + 's">' + String(x).split('@@PN@@').join(nmUpper()) + '</div>').join('');
     }
     function cutShow(src) {
       if (src === null) { cut.classList.remove('on'); return; }
@@ -14923,7 +14924,7 @@ setInterval(() => {
   var TH = /[\u0E01-\u0E3A\u0E40-\u0E4E]/;   // ตัวอักษรไทย (ไม่นับ ฿ และเลขไทย)
   var missing = {}, missN = 0;
   function note(s) { if (missN < 3000 && !has(missing, s)) { missing[s] = 1; missN++; } }
-  function trStr(s) {
+  function trStr0(s) {
     if (!TH.test(s)) return s;
     s = s.replace(/\u200b/g, '');   // ตัดอักขระความกว้างศูนย์ที่แฝงอยู่ในข้อความ
     var m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s), lead = m[1], body = m[2], trail = m[3], i;
@@ -14938,6 +14939,18 @@ setInterval(() => {
     for (i = 0; i < SUB.length; i++) if (out.indexOf(SUB[i][0]) > -1) out = out.split(SUB[i][0]).join(SUB[i][1]);
     if (TH.test(out)) note(core);
     return lead + out + trail;
+  }
+  /* ชื่อผู้เล่นที่ตั้งเอง: ประโยคสคริปต์เขียนด้วยชื่อเริ่มต้น "กัมป์" → ถ้าแปลตรงๆ ไม่ผ่าน ให้สลับชื่อกลับเป็น "กัมป์" แปล แล้วใส่ชื่อผู้เล่นคืน */
+  var thN = function (x) { var m = x.match(/[\u0E01-\u0E3A\u0E40-\u0E4E]/g); return m ? m.length : 0; };
+  function trStr(s) {
+    var r = trStr0(s);
+    if (!TH.test(r)) return r;
+    var n = '';
+    try { if (typeof playerName === 'function') n = String(playerName() || ''); } catch (e) {}
+    if (!n || n === 'กัมป์' || n.length < 2 || s.indexOf(n) < 0) return r;
+    var r2 = trStr0(s.split(n).join('กัมป์')), g = trStr0('กัมป์');
+    if (g && g !== 'กัมป์' && thN(r2) < thN(r)) return r2.split(g).join(n);
+    return r;
   }
   var trMulti = function (s) { return String(s).split('\n').map(trStr).join('\n'); };
 
@@ -15290,6 +15303,11 @@ I18N.addFrag({
 <script>
 /* ชื่อท่าในปุ่มโหมดย่อ: เกมตัดวงเล็บท้ายชื่อออกก่อนแสดง จึงเหลือ "เลี้ยงหลบ Lv.2" / "เลี้ยงอัด Lv.2" ที่ไม่มีคำแปลตรงตัว */
 I18N.add({"เลี้ยงหลบ":"Dribble Dodge","เลี้ยงอัด":"Power Charge"});
+</script>
+<script>
+/* English: Stage 8 coach (Vik) re-order bubble after a miss + Maya cafeteria help button */
+I18N.add({"เอาใหม่!":"Again!","📖 มายาสอน":"📖 Maya teaches"});
+I18N.addFrag({"ข้าบอกให้ใช้ท่า ":"I told you to use "});
 </script>
 
 <script>
